@@ -10,7 +10,7 @@ API'et har 2 forskellige routes.
 * `/hund   (der svarer 'Vov-vov på en GET request)`
 
  
-Selve serveren er defineret i 'server.js' og benytter sig af node modulet 'http'.
+Selve serveren er defineret i `server.js` og benytter sig af node modulet `http` samt et modul, `router.js` som vi selv skal skrive koden til.
 
 server.js
 ```javascript
@@ -21,8 +21,6 @@ const
 http.createServer(router).listen(3003);
 console.log('Server er startet. Venter tålmodigt ved port 3003');
 ```
-
-Vi importerer 2 moduler her, _http_ og _router_. http-modulet er en del af Node.js installationen. Det andet modul er et modul vi selv skriver koden til. Vi omtaler dette modul senere.
 
 Vi opretter en server med createServer() metoden. Samtidig sendes modulet `router` "ned i maven" på serveren. Derefter konfigureres serveren til at benytte port 3003.
 
@@ -63,9 +61,9 @@ module.exports = function(req, res){
 
 Kigger vi på vores endpointhandlere ser vi, at de to funktioner ligner hinanden ret meget. Eneste forskel er at den ene sender tekststrengen 'Miauv' til browseren, mens den anden sender 'Vov-vov'.
 
-Derfor vil jeg ændre koden lidt. Først opretter jeg en ny mappe, `endpointhandlers`. I denne mappe vil jeg oprette to filer, `kat.js`og `hund.js`.
+Derfor vil jeg ændre koden lidt. Først opretter jeg en ny mappe, `endpointhandlers`. I denne mappe vil jeg oprette to filer, `kat.js` og `hund.js`.
 
-I det to filer placeres funktionerne for henholdsvis `/kat`og `/hund` routene.
+I det to filer placeres funktionerne for henholdsvis `/kat` og `/hund` routene.
 
 endpointhandlers/kat.js
 ```javascript
