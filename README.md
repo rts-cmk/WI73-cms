@@ -46,15 +46,22 @@ const routes = {
 };
 
 module.exports = function(req, res){
+    // Vi henter pathname fra request objektet.
     var pathname = url.parse(req.url).pathname;
     
+    // Hvis vi har en route der matcher '/kat' eller '/hund'
+    // henter vi den ind i 'handler' variablen
     var handler = routes[pathname];
+    
+    // Checker om vi har noget i 'handler'...
     if(handler){
-        handler(res);
-        return;
+        handler(res);   // ...hvis vi har en funktion i 'handler' skal den eksekveres...
+        return; // ...derefter afsluttes funktionen.
     }
+    
     // Hvis vi er her er der ikke fundet en route (eller endpointhandler)
-    res.writeHead(404, {'Content-type' : 'application/json'});
+    // Det meddeler vi i form af en tekst
+    res.writeHead(404, {'Content-type' : 'text/plain; charset=utf-8'});
     res.end('Route ' + pathname + ' findes ikke');                    
 }
 ```
@@ -83,7 +90,7 @@ module.exports = function(res) {
 ```
 
 Vi har nu fået adskilt selve endpointhandlerne fra `routes.js`, men stadig har vi to handlere der har en del til fælles.
-Næste skridt vil være at oprette endnu en fil som jeg vil kalde `helpers.js`. Denne fil er tænkt til at indholde hjælpefunktioner. I dette eksempel vil der dog kun være en enkelt hjælpefunktion, eller rettere sagt metode, nemlig `.respond()`. Tanken er at denne metode skal indeholde den kode der er fælles for endpointhandlerne. Koden for `respond()` metoden skal se sådan ud:
+Næste skridt vil være at oprette endnu en fil som jeg vil kalde `helpers.js`. Denne fil er tænkt til at indeholde hjælpefunktioner. I dette eksempel vil der dog kun være en enkelt hjælpefunktion, eller rettere sagt metode, nemlig `.respond()`. Tanken er at denne metode skal indeholde den kode der er fælles for endpointhandlerne. Koden for `respond()` metoden skal se sådan ud:
 
 
 helpers.js
