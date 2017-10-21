@@ -1,4 +1,8 @@
 # CMS bygget med Node.js
+
+### 1. Del.
+
+
 ### Indledningsvis vil vi starte med at demonstrere et simpelt API
 
 #### Et meget simpelt API der viser hvordan routes kan opbygges i node.js uden brug af 3. parts moduler.
@@ -204,6 +208,87 @@ module.exports = function(req, res){
 ```
 
 Vi har nu et simpelt API der er i stand til at svare på både `GET` og `POST` request. Det er nu op til dig at udvide dette API til også at kunne håndtere andre requesttyper fx. `PUT` og `DELETE`. Prøv også at tilføje en route, fx. `/and` der svarer `Rap-rap` på indkommende request.
+
+### 2. del. Statiske filer
+
+Vores API kan ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre. 
+
+Vi skal tilføje en hjælpefunktion til vores `helpers.js`. Funktionen skal kunne læse en fil fra filsystemet og sende indholdet i filen til en browser ved hjælp af `response` objektet. Derfor får vi brug for filsystem-modulet `fs`. 
+
+Vi får også brug for at kunne detektere hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.
+
+Vi opretter et json-objekt i `helpers` filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filer vi ønsker at håndtere, og værdierne svarer til mimetyperne.
+
+Koden for mimetype-objektet.
+```javascript
+const fs = require('fs');  // Importer filsystem-modulet
+const path = require('path');
+
+// De foreløbige mimetypes. Vi kan tilføje flere når behovet opstår
+const mimetypes = {
+    '.html' :  'text/html',               // mimetype for html
+    '.css'  :  'text/css',                // mimetype for css
+    '.js'   :  'application/javascript',  // mimetype for javascript
+    '.png'  :  'image/png'                // mimetype for png 
+};
+
+´´´
+
+Vi får også brug for en funktion der kan læse filer fra serverens filsystem. Derfor får vi brug for at importere filsystem modulet `fs` der også er en del af node installationen.
+
+Det gør vi i starten af filen `helpers.js` med denne linje `var fs = require('fs');` 
+
+Koden til funktionen der skal læse en fil fra filsystemet sende den til browseren placeres også i `helpers.js` 
+
+Her er koden
+```javascript
+exports.fileRespond = funktion(res, fileName){
+    fs.readFile(fileName, function(err, fileContent){
+        if(err){
+            // Hvis der opstod en fejl, er vi her.
+            exports.respond(res, `Filen '${fileName}' findes ikke.`, 404);
+            return;
+        }
+        
+        // Hvis vi er her, er der fundet en fil der kan læses. Indholdet skal så sendes til browseren,
+        // men først skal vi detektere hvilken mimetype det handler om.
+        
+        var ext = path.extname(fileName); // hent fil-ekstension
+        var mime = mimetypes[ext] // brug ekstensionen til at hente mimetype
+        res.writeHead(200, {'Content-type' : mime });
+        res.end(fileContent);
+    }
+}
+
+```
+
+Funktionen tager to parametre, response objektet og stien til filen der skal sendes.
+
+Men inden vi ændrer mere i koden skal vi oprette en mappe til vores statiske filer. Jeg har valgt at kalde mappen for `public`. Inde i denne mappe vil jeg, til at begynde med, placere en html-fil samt tre undermapper `js`, `css` og `img`. Mapperne er tænkt til at indeholde henholdsvis javascript-, stylesheet- og billedfiler. Efter at have oprettet disse filer, ser mappestrukturen således ud:
+
+
+```
+├── endpointhandlers
+│   ├── cat.js
+│   └── dog.js
+│
+├── public
+│   ├── css
+│   │   └── style.css
+│   │
+│   ├── img
+│   │   ├── logo.png
+│   │   └── anonymprofil.png
+│   │
+│   ├── js
+│   │   └── script.js
+│   │
+│   └── index.html
+│
+├── helpers.js
+├── router.js
+└── server.js
+```
 
 
 Fortsættes...
