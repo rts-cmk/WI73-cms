@@ -7,16 +7,26 @@ const routes = {
     '/dog': require('./endpointhandlers/dog')
 };
 
-// console.log(routes['/cat']);
-
-
 module.exports = function (req, res) {
-    console.log(req.method);
+    
     var pathname = url.parse(req.url).pathname;
+
+    if(pathname === '/'){
+        helpers.fileRespond(res, 'public/index.html');
+        return;
+    }
+
+    var regexFile = pathname.match(/^\/((css|js|img)\/)?\w+\.(html|css|js|png)$/);
+    if(regexFile){
+        helpers.fileRespond(res, 'public' + regexFile[0]);
+        return;
+    }
+    // console.log(regexFile[0]);
+    
     var action = routes[pathname];
     if (action) {
         var method = req.method;
-        var handler = action[req.method];
+        var handler = action[method];
 
         if (handler){
             handler(res);
