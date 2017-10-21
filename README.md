@@ -319,7 +319,7 @@ var regExResult = text.match(/Roskilde/);
 [ 'Roskilde', index: 0, input: 'Roskilde Tekniske Skole' ]
 ```
 
-Det første element i arrayet, element 0, indeholder det som `match()` metoden har fundet, det andet element, `index: 0`, viser positionen i teksten hvor der blev fundet et match, mens det sidste element. `input: 'Roskilde Tekniske Skole'`, viser den tekststreng der blev brugt til at søge i.
+Det første element i arrayet, element 0, indeholder det som `match()` metoden har fundet, det andet element, `index: 0`, viser positionen i teksten hvor der blev fundet et match, mens det sidste element, `input: 'Roskilde Tekniske Skole'`, viser den tekststreng der blev brugt til at søge i.
 
 Jeg vil ikke gå i dybden med regular expressions. Der findes en række websider med tutorials om regex, fx `https://www.w3schools.com/jsref/jsref_obj_regexp.asp` eller `https://regex101.com/`. 
 
