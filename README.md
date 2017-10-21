@@ -456,6 +456,33 @@ Til at starte med skal vi oprette en database. Det kan vi gøre med en række da
 
 ```sql
 CREATE DATABASE `demo-cms` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_danish_ci */;
+```
+
+Vi får brug for en tabel til de menupunkter vi vil vise på siden. Tabellen skal have kolonner for primærnøgle (id), navn, eventuel beskrivelse, et timestamp for indsættelse af en række samt en kolonne for rækkefølgen som vi ønsker at vise de enkelte menupunkter. 
+
+Menu tabellen
+```sql
+CREATE TABLE `menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL DEFAULT '',
+  `description` varchar(255) NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `position` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+); 
+```
+Vi får også brug for en tabel til de artikler vi ønsker at vise på vores side.
+
+Articles tabellen
+```sql
+CREATE TABLE `articles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_menu_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
 
 ```
 
