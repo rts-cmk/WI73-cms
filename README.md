@@ -264,6 +264,39 @@ exports.fileRespond = funktion(res, fileName){
 
 Funktionen tager to parametre, response objektet og stien til filen der skal sendes.
 
+Koden i `helpers.js` ser nu sådan ud:
+```javscript
+const fs = require('fs');
+const path = require('path');
+
+const mimetypes = {
+    '.html' : 'text/html',
+    '.css' : 'text/css',
+    '.js' : 'text/js',
+    '.png' : 'image/png'
+};
+
+exports.fileRespond = function(res, fileName){
+    console.log(fileName);
+    fs.readFile(fileName, function(err, fileContent){
+        if(err){
+            exports.respond(res, `Filen blev ikke fundet', 404);
+            return;
+        }
+        var ext = path.extname(fileName);
+        var mime = mimetypes[ext];
+        res.writeHead(200, {'Content-type': mime})
+        res.end(fileContent);
+    });
+};
+
+exports.respond = function (res, besked, status = 200) {
+    res.writeHead(status, { 'Content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(besked));
+};
+```
+
+
 
 Men inden vi ændrer mere i koden skal vi oprette mapper til vores statiske filer. Jeg har valgt at placere alle statiske filer i en mappe jeg kalder `public`. Inde i denne mappe vil jeg, til at begynde med, placere en html-fil samt tre undermapper `js`, `css` og `img`. Mapperne er tænkt til at indeholde henholdsvis javascript-, stylesheet- og billedfiler. Efter at have oprettet disse filer, ser mappestrukturen således ud:
 
@@ -324,7 +357,7 @@ Et `regex` mønster placeres mellem to slashes, fx `/mønster/`. Det der står m
 
 Eksempel:
 ```javascript
-// Først en variable med en tekststreng
+// Først en variabel der indeholder en tekststreng
 var tekst = "Roskilde Tekniske Skole";
 
 // Vi vil undersøge om teksten indeholder "Roskilde".
@@ -339,7 +372,78 @@ var regExResult = text.match(/Roskilde/);
 
 Det første element i arrayet, element 0, indeholder det som `match()` metoden har fundet, det andet element, `index: 0`, viser positionen i teksten hvor der blev fundet et match, her 0, mens det sidste element, `input: 'Roskilde Tekniske Skole'`, viser den tekststreng der blev søgt i.
 
+Hvis `match()` metoden ikke finder noget der matcher returneres `null`.
+
 Jeg vil ikke gå i dybden med regular expressions. Der findes en række websider med tutorials om regex, fx `https://www.w3schools.com/jsref/jsref_obj_regexp.asp` eller `https://regex101.com/`. 
 
+Jeg vil stærkt anbefale at du bruger lidt tid til at sætte sig ind i regular expressions. De findes i rigtig mange programmeringssprog, og er et _must_ for en programmør at kunne. 
 
+Når du har lært hvordan regex virker, og har fået lidt øvelse i at opbygge regexes, kan du fortsætte her.
+
+Lad os prøve at annvende regex i forbindelse med `match()` metoden.
+
+Nedenstående kodelinie kan finde request for html, css, js, jpg, og png filer.
+```
+var fileRequest = pathname.match(/^\/((css|js|img)\/)?\w+\.(html|css|js|png|jpg)$/);   
+```
+
+Hvis der er fundet noget der matcher, returneres et array med alle matchdata til variablen  `fileRequest`. Ellers returneres `null`.
+
+Det betyder at vi med en simpel `if` kan undersøge om der er fundet noget.
+
+```
+var fileRequest = pathname.match(/^\/((css|js|img)\/)?\w+\.(html|css|js|png|jpg)$/);
+if(fileRequest){
+    // Den fulde match ligger i fileRequest[0], det første element i arrayet.
+    // Vi kan derfor sende det fundne sammen med responseobjektet til fileResponse() metoden.
+    helpers.fileResond(res, fileRequest[0])
+}
+```
+
+Koden i `router.js` skal nu se sådan ud.
+```javascript
+const url = require('url');
+const helpers = require('./helpers');
+
+const routes = {
+    '/cat': require('./endpointhandlers/cat'),
+
+    '/dog': require('./endpointhandlers/dog')
+};
+
+module.exports = function (req, res) {
+    
+    var pathname = url.parse(req.url).pathname;
+
+    if(pathname === '/'){
+        helpers.fileRespond(res, 'public/index.html');
+        return;
+    }
+
+    var regexFile = pathname.match(/^\/((css|js|img)\/)?\w+\.(html|css|js|png)$/);
+    if(regexFile){
+        helpers.fileRespond(res, 'public' + regexFile[0]);
+        return;
+    }
+    // console.log(regexFile[0]);
+    
+    var action = routes[pathname];
+    if (action) {
+        var method = req.method;
+        var handler = action[method];
+
+        if (handler){
+            handler(res);
+        }
+        else{
+            helpers.respond(res, `Metode ${req.method} ikke tilladt`, 404);
+            return;
+        }
+        // action(res);
+        return;
+    }
+    // Hvis vi er her er der ikke fundet en route
+    helpers.respond(res, 'Route findes ikke', 404);
+};
+```
 Fortsættes...
