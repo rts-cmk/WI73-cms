@@ -5,7 +5,7 @@
 
 ### Indledningsvis vil vi starte med at demonstrere et simpelt API
 
-#### Et meget simpelt API der viser hvordan routes kan opbygges i node.js uden brug af 3. parts moduler.
+#### Et meget simpelt API der viser hvordan routes kan opbygges i node.js (næsten) uden brug af 3. parts moduler.
 
 Dvs. dette eksempel benytter sig udelukkende af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at _nodemon_ modulet installeres. 
 
@@ -446,4 +446,18 @@ module.exports = function (req, res) {
     helpers.respond(res, 'Route findes ikke', 404);
 };
 ```
+
+### 3. Del. Databasen.
+
+I vores CMS får vi brug for at opbevare data. Til det formål skal vi oprette en database med de nødvendige tabeller.
+Der findes mange databasesystemer at vælge i mellem. Jeg har valgt at bruge MySQL.
+
+Til at starte med skal vi oprette en database. Det kan vi gøre med en række databaseværktøjer fx phpMyAdmin eller MySQL-Workbench eller fra den tekstbaserede MySQL client.
+
+```sql
+CREATE DATABASE `demo-cms` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_danish_ci */;
+
+```
+
+
 Fortsættes...
