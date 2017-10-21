@@ -264,7 +264,6 @@ exports.fileRespond = funktion(res, fileName){
 
 Funktionen tager to parametre, response objektet og stien til filen der skal sendes.
 
-Planen er nu at undersøge indholdet i variablen `pathname` i filen `router.js`. Hvis den kun indeholder `/`, skal vi blot sende indholdet af `index.html` der er vores "default" html fil. Hvis `pathname` derimod er et filnavn som fx `style.css`, `script.js` eller `logo.png` skal vores ny funktion sende filindholdet til browseren, hvis filen altså findes. De filer der er tale om er vores såkaldte statiske filer.
 
 Men inden vi ændrer mere i koden skal vi oprette mapper til vores statiske filer. Jeg har valgt at placere alle statiske filer i en mappe jeg kalder `public`. Inde i denne mappe vil jeg, til at begynde med, placere en html-fil samt tre undermapper `js`, `css` og `img`. Mapperne er tænkt til at indeholde henholdsvis javascript-, stylesheet- og billedfiler. Efter at have oprettet disse filer, ser mappestrukturen således ud:
 
@@ -292,17 +291,36 @@ Men inden vi ændrer mere i koden skal vi oprette mapper til vores statiske file
 └── server.js
 ```
 
+Planen er nu at undersøge indholdet i variablen `pathname`. Hvis den kun indeholder `/`, skal vi blot sende indholdet af `index.html`. Det kan vi gøre med vores nye funktion.
 
-Planen er nu at undersøge indholdet i variablen `pathname` i filen `router.js`. Hvis den indeholder `/`, skal vi blot sende indholdet af `index.html` der er vores "default" html fil.
+Med en if-sætning kan vi undersøge om `pathname` kun indeholder `/`, 
 
-Men for at undersøge om `patname` variablen indeholder et gyldigt filnavn, har jeg valgt at bruge den indbyggede javascript metode `.match()`. Denne metode gør brug af `regular-expression` (regular expressions forkortes ofte til regex)
+```javacsript 
+if(pathname === '/') {
+    helpers.fileRespond(res, 'public/index.html'); 
+}
+```
 
-Men lad os kigge på hvad regular-expressions er for noget og hvad den kan anvendes til. 
+Hvis browseren sender en GET-request for en fil, fx `css/style.css`, vil variablen `pathname` indeholde tekststrengen `css/style.css`. Pathname variablen vil altid indeholde requesten. Det betyder at vi kan undersøge om variablen indeholder et filnavn, eller rettere, undersøge om indholdet udgør et mønster for et filnavn. Men hvordan ser et mønsteret for et filnavn ud?. Lad os kigge på de filer der kan komme på tale i vores system. Det er først og fremmest html-, css-, js-, png-, og jpg-filer,  
 
-En regular expression bruges til at søge efter bestemte mønstre i en tekststreng, fx om en tekststreng indeholder et filnavn som `index.html`, eller `/img/logo.png`. De filnavne vi kommer til at arbejde med, har det til fælles de har en ekstension der er enten `.html`, `.css`, `js`, `png` eller `jpg`
+Mønsteret for disse filer er at de har et filnavn bestånde af en eller flere alfanumeriske karakterer efterfulgt af punktum og derefter bogstaverne 'html', 'css', 'js', 'png', eller 'jpg'. Yderligere kan der være angivet et mappenavn foran filnavnet.
+
+Eksempel
+```
+index.html
+css/style.css
+js/script.js
+img/logo.png
+```
+
+For at undersøge om `patname` indeholder filnavnmønster, har jeg valgt at bruge den indbyggede javascript metode `.match()`. Denne metode gør brug af `regular expression`
+
+Men lad os kigge på hvad regular expressions er for noget og hvad det kan anvendes til. 
+
+En regular expression, eller blot regex, bruges til at søge efter bestemte mønstre i en tekststreng, fx om en tekststreng indeholder et filnavn som `index.html`, eller `/img/logo.png`. De filnavne vi kommer til at arbejde med, har det til fælles de har en ekstension der er enten `.html`, `.css`, `js`, `png` eller `jpg`
 Derudover kan disse filer være placerede i mapper så stien til dem kan være fx `css/style.css` eller `/img/logo-png`.
 
-Et `regular exression` mønster eller blot regex placeres mellem to slashes fk `/mønster/` hvor det der står mellem slashene udgør det mønster vi søger efter.
+Et `regex` mønster placeres mellem to slashes, fx `/mønster/`. Det der står mellem slashene udgør mønsteret vi søger efter.
 
 Eksempel:
 ```javascript
@@ -319,7 +337,7 @@ var regExResult = text.match(/Roskilde/);
 [ 'Roskilde', index: 0, input: 'Roskilde Tekniske Skole' ]
 ```
 
-Det første element i arrayet, element 0, indeholder det som `match()` metoden har fundet, det andet element, `index: 0`, viser positionen i teksten hvor der blev fundet et match, mens det sidste element, `input: 'Roskilde Tekniske Skole'`, viser den tekststreng der blev brugt til at søge i.
+Det første element i arrayet, element 0, indeholder det som `match()` metoden har fundet, det andet element, `index: 0`, viser positionen i teksten hvor der blev fundet et match, her 0, mens det sidste element, `input: 'Roskilde Tekniske Skole'`, viser den tekststreng der blev søgt i.
 
 Jeg vil ikke gå i dybden med regular expressions. Der findes en række websider med tutorials om regex, fx `https://www.w3schools.com/jsref/jsref_obj_regexp.asp` eller `https://regex101.com/`. 
 
