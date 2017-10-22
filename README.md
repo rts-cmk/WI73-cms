@@ -597,10 +597,10 @@ const dbcreds = {
 var dbh = mysql.createConnection(dbcreds);
 
 exports.select = function(res, params, callback){
-    var sql = `select ${params.fields.join(',')} 
+    var sql = `select ${params.fields.join(', ')} 
                from ${params.tables} 
                ${params.cond? params.cond : ''} 
-               ${params.sort? 'order by' + params.sort.join(',') : ''}`;
+               ${params.sort? ' order by ' + params.sort.join(', ') : ''}`;
                
     dbh.query(sql, params.values, function(err, data){
         if(err){
