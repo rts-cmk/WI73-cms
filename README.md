@@ -471,6 +471,7 @@ CREATE TABLE `menu` (
   PRIMARY KEY (`id`)
 ); 
 ```
+
 Vi får også brug for en tabel til de artikler vi ønsker at vise på vores side.
 
 Articles tabellen
@@ -486,5 +487,128 @@ CREATE TABLE `articles` (
 
 ```
 
+Vi skal også oprette en databasebruger med de nødvendige crud-rettigheder. Jeg har valgt at brugeren skal hedde `wwwuser`.
+Jeg har sat brugerens adgangskode `wwwuser`. I en produktionsklar udgave af dette CMS skal man naturligvis vælge en bedre adgangskode end ovenstående, men i udviklingsfasen, hvor systemet ikke er tilgængeligt fra internettet er det ok.
 
+Ny bruger:
+```sql
+CREATE USER 'wwwuser'@'localhost' IDENTIFIED BY 'wwwuser';
+```
+
+Brugeren skal også have CRUD rettigheder til alle tabeller i `demo-cms` databasen
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON demo-cms.* TO 'wwwuser'@'localhost';
+```
+
+For at få adgang til databasen fra node.js skal vi bruge et 3. parts modul. Dette vil være det eneste 3. parts modul vi får brug for. Modulet er `mysql2.js`. Vi installerer modulet med npm: `npm install --save mysql2`
+
+Nu skal vi oprette en ny mappe til de javascript filer der skal håndtere databasen.
+
+Jeg har valgt at kalde mappen for `data`. Inde i den mappe opretter jeg en fil der hedder `database.js` Filstrukturen ser nu således ud
+
+```
+├── data
+│   ├── database.js
+│
+├── endpointhandlers
+│   ├── cat.js
+│   └── dog.js
+│
+├── public
+│   ├── css
+│   │   └── style.css
+│   │
+│   ├── img
+│   │   ├── logo.png
+│   │   └── anonymprofil.png
+│   │
+│   ├── js
+│   │   └── script.js
+│   │
+│   └── index.html
+│
+├── helpers.js
+├── router.js
+└── server.js
+```
+
+Lad os kigge på `database.js` filen.
+```javscript
+const helpers = require('./../helpers');
+const mysql = require('mysql2');
+
+// objekt til database credentials
+const dbcreds = {
+    user : 'wwwuser',
+    password : 'wwwuser',
+    host : 'localhost',
+    database : 'demo-cms'
+};
+
+// Opret forbindelse til databasen
+var dbh = mysql.createConnection(dbcreds);
+```
+
+Jeg har planlagt at exportere nogle metoder (funktioner) til generel håndtering af CRUD operationer. Den første metode kalder jeg `select`. Den skal modtage et JSON-objekt samt en callback-funktion. JSON objektet skal indeholde informationer om hvilken tabel eller tabeller (table-joins) jeg ønsker at læse data fra, hvilke datakolonner jeg vil læse og hvilke betingelser (where clauses) samt evt. sortering. Planen er at anvende prepared statements med '?' som placeholdere. Derfor skal objektet også indeholde de values jeg skal bruge i mine prepared statements.
+
+Et eksempel på hvordan jeg planlægger formatet på JSON-objektet:
+```
+var params = {
+    fields : ["col1", "col2", "col3", ..., "coln"],
+    tables : 'table1 join table2 on table1.col1 = table2.colx',
+    cond : "where table2.colz = ? and table1.col1 = ?",
+    sort : ["table1.col2 desc", "table2.colx asc"],
+    values : ["val1", "val2"]
+}
+```
+
+Funktionen der skal tage imod objektet kommer til at se sådan ud:
+```javscript
+exports.select = function(res, params, callback){
+    var sql = `select ${params.fields.join(',')} 
+               from ${params.tables} 
+               ${params.cond? params.cond : ''} 
+               ${params.sort? 'order by' + params.sort.join(',') : ''}`;
+               
+    dbh.query(sql, params.values, function(err, data){
+        if(err){
+            helpers.respond(res, 'Der opstod en fejl.', 400);
+            return;
+        }
+        callback(data)
+    };          
+};
+```
+
+Koden i `database.js` ser nu sådan ud;
+```javscript
+const helpers = require('./../helpers');
+const mysql = require('mysql2');
+
+// objekt til database credentials
+const dbcreds = {
+    user : 'wwwuser',
+    password : 'wwwuser',
+    host : 'localhost',
+    database : 'demo-cms'
+};
+
+// Opret forbindelse til databasen
+var dbh = mysql.createConnection(dbcreds);
+
+exports.select = function(res, params, callback){
+    var sql = `select ${params.fields.join(',')} 
+               from ${params.tables} 
+               ${params.cond? params.cond : ''} 
+               ${params.sort? 'order by' + params.sort.join(',') : ''}`;
+               
+    dbh.query(sql, params.values, function(err, data){
+        if(err){
+            helpers.respond(res, 'Der opstod en fejl.', 400);
+            return;
+        }
+        callback(data)
+    };          
+};
+```
 Fortsættes...
