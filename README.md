@@ -546,10 +546,37 @@ const dbcreds = {
 };
 
 // Opret forbindelse til databasen
-var dbh = mysql.createConnection(dbcreds);
+var connection = mysql.createConnection(dbcreds);
 ```
+Hvis det lykkes at oprette en forbindelse til databasen, vil variablen `connection` indeholde et database objekt der har forbindelse til databasen og giver os mulighed for at manipulere med databasen.
+
+Næste skridt er at exportere en metode, eller funktion der kan hente data fra databasen. Metoden skal tage et response objekt, en sql streng samt en callback funktion der kan tage imod de data der kommer fra databasen.
+
+Med den tilføjede kode ser `database.js` sådan ud.
+
 
 ```javascript
+const mysql = require('mysql2');
+const helpers = require('./../helpers');
+
+const creds = {
+    host : 'localhost',
+    user : 'wwwuser',
+    password : 'wwwuser',
+    database : 'demo-cms'
+};
+
+const connection = mysql.createConnection(creds);
+
+exports.select = function(res, sql, callback){
+    connection.query(sql, function(err, data){
+        if(err){
+            helpers.respond(res, {besked : 'Der opstod en fejl...'}, 404);
+            return
+        }
+        callback(data);
+    })
+}
 ```
 
 Fortsættes...
