@@ -10,8 +10,8 @@
 Dvs. dette eksempel benytter sig udelukkende af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at _nodemon_ modulet installeres. 
 
 API'et har 2 forskellige routes.
-* `/kat    (der svarer 'Miav' på en GET request)`
-* `/hund   (der svarer 'Vov-vov på en GET request)`
+* `/cat    (der svarer 'Miauw' på en GET request)`
+* `/dog   (der svarer 'Vov-vov på en GET request)`
 
  
 Selve serveren er defineret i `server.js` og benytter sig af node modulet `http` samt et modul, `router.js` som vi selv skal skrive koden til.
@@ -38,12 +38,12 @@ const url = require('url');
 
 // Definition af vores API og API-handlere
 const routes = {
-    '/kat' : function(res) {
+    '/cat' : function(res) {
                  res.writeHead(200, {'Content-type' : 'application/json'});
-                 res.end('Miav');
+                 res.end('Miauv');
              },
              
-    '/hund' : function(res){
+    '/dog' : function(res){
                  res.writeHead(200, {'Content-type' : 'application/json'});
                  res.end('Vov-vov');                
               }            
@@ -53,7 +53,7 @@ module.exports = function(req, res){
     // Vi henter pathname fra request objektet.
     var pathname = url.parse(req.url).pathname;
     
-    // Hvis vi har en route der matcher '/kat' eller '/hund'
+    // Hvis vi har en route der matcher '/cat' eller '/dog'
     // henter vi den ind i 'handler' variablen
     var handler = routes[pathname];
     
@@ -72,19 +72,19 @@ module.exports = function(req, res){
 
 Kigger vi på vores endpointhandlere ser vi, at de to funktioner ligner hinanden ret meget. Eneste forskel er at den ene sender tekststrengen 'Miauv' til browseren, mens den anden sender 'Vov-vov'.
 
-Derfor vil jeg ændre koden lidt. Først opretter jeg en ny mappe, `endpointhandlers`. I denne mappe vil jeg oprette to filer, `kat.js` og `hund.js`.
+Derfor vil jeg ændre koden lidt. Først opretter jeg en ny mappe, `endpointhandlers`. I denne mappe vil jeg oprette to filer, `cat.js` og `dog.js`.
 
-I det to filer placeres funktionerne for henholdsvis `/kat` og `/hund` routene.
+I det to filer placeres funktionerne for henholdsvis `/cat` og `/dog` routene.
 
-endpointhandlers/kat.js
+endpointhandlers/cat.js
 ```javascript
 
 module.exports = function(res) {
     res.writeHead(200, {'Content-type' : 'application/json'});
-    res.end('Miav');
+    res.end('Miauv');
 };
 ```
-endpointhandlers/hund.js
+endpointhandlers/dog.js
 ```javascript
 
 module.exports = function(res) {
@@ -101,7 +101,7 @@ helpers.js
 ```javacsript
 exports.respond = function(res, message, status = 200){
     res.writeHead(status, {'Content-type' : 'application/json'});
-    res.end(message);
+    res.end(JSON.stringify(message));
 };
 ```
 
@@ -117,9 +117,9 @@ const helpers = require('./helpers');
 
 // Definition af vores API og API-handlere
 const routes = {
-    '/kat' : require('./endpointhandlers/kat'),
+    '/cat' : require('./endpointhandlers/cat'),
              
-    '/hund' : require('./endpointhandlers/hund')            
+    '/dog' : require('./endpointhandlers/dog')            
 };
 
 module.exports = function(req, res){
@@ -139,26 +139,26 @@ I sin nuværende form kan vores API ikke skelne mellem request metoder som fx `G
 
 Heldigvis er det enkelt at udvide API'et til også at kunne dette.
 
-Lad os kigge på en af endpointhandlerne, `kat`. Hvis vi i dette modul ændrer koden til at se sådan ud:
+Lad os kigge på en af endpointhandlerne, `cat`. Hvis vi i dette modul ændrer koden til at se sådan ud:
 
-endpointhandlers/kat.js
+endpointhandlers/cat.js
 ```javascript
 
 module.exports = {
     'GET' : function(res) {
                 res.writeHead(200, {'Content-type' : 'application/json'});
-                res.end('GET: Miav');
+                res.end('GET: Miauv');
             },
     'POST' : function(res) {
                 res.writeHead(200, {'Content-type' : 'application/json'});
-                res.end('POST: Miav');
+                res.end('POST: Miauv');
             }            
 };
 ```
 
-På tilsvarende vis skal `hund` ændres til at se sådan ud:
+På tilsvarende vis skal `dog` ændres til at se sådan ud:
 
-endpointhandlers/kat.js
+endpointhandlers/cat.js
 ```javascript
 
 module.exports = {
@@ -184,9 +184,9 @@ const helpers = require('./helpers');
 
 // Definition af vores API og API-handlere
 const routes = {
-    '/kat' : require('./endpointhandlers/kat'),
+    '/cat' : require('./endpointhandlers/cat'),
              
-    '/hund' : require('./endpointhandlers/hund')            
+    '/dog' : require('./endpointhandlers/dog')            
 };
 
 module.exports = function(req, res){
@@ -549,66 +549,7 @@ const dbcreds = {
 var dbh = mysql.createConnection(dbcreds);
 ```
 
-Jeg har planlagt at exportere nogle metoder (funktioner) til generel håndtering af CRUD operationer. Den første metode kalder jeg `select`. Den skal modtage et JSON-objekt samt en callback-funktion. JSON objektet skal indeholde informationer om hvilken tabel eller tabeller (table-joins) jeg ønsker at læse data fra, hvilke datakolonner jeg vil læse og hvilke betingelser (where clauses) samt evt. sortering. Planen er at anvende prepared statements med '?' som placeholdere. Derfor skal objektet også indeholde de values jeg skal bruge i mine prepared statements.
-
-Et eksempel på hvordan jeg planlægger formatet på JSON-objektet:
-```
-var params = {
-    fields : ["col1", "col2", "col3", ..., "coln"],
-    tables : 'table1 join table2 on table1.col1 = table2.colx',
-    cond : "where table2.colz = ? and table1.col1 = ?",
-    sort : ["table1.col2 desc", "table2.colx asc"],
-    values : ["val1", "val2"]
-}
+```javascript
 ```
 
-Funktionen der skal tage imod objektet kommer til at se sådan ud:
-```javscript
-exports.select = function(res, params, callback){
-    var sql = `select ${params.fields.join(',')} 
-               from ${params.tables} 
-               ${params.cond? params.cond : ''} 
-               ${params.sort? 'order by' + params.sort.join(',') : ''}`;
-               
-    dbh.query(sql, params.values, function(err, data){
-        if(err){
-            helpers.respond(res, 'Der opstod en fejl.', 400);
-            return;
-        }
-        callback(data)
-    };          
-};
-```
-
-Koden i `database.js` ser nu sådan ud;
-```javscript
-const helpers = require('./../helpers');
-const mysql = require('mysql2');
-
-// objekt til database credentials
-const dbcreds = {
-    user : 'wwwuser',
-    password : 'wwwuser',
-    host : 'localhost',
-    database : 'demo-cms'
-};
-
-// Opret forbindelse til databasen
-var dbh = mysql.createConnection(dbcreds);
-
-exports.select = function(res, params, callback){
-    var sql = `select ${params.fields.join(', ')} 
-               from ${params.tables} 
-               ${params.cond? params.cond : ''} 
-               ${params.sort? ' order by ' + params.sort.join(', ') : ''}`;
-               
-    dbh.query(sql, params.values, function(err, data){
-        if(err){
-            helpers.respond(res, 'Der opstod en fejl.', 400);
-            return;
-        }
-        callback(data)
-    };          
-};
-```
 Fortsættes...
