@@ -1,0 +1,73 @@
+*{margin:0;padding:0;box-sizing: border-box}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+html, body{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+main{
+    position: relative;
+    width: 80%;
+    height: 100%;
+    margin: auto;
+    border: thin solid red;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/* header på publicsiden */
+#publicheader{
+    width: 100%;
+    height: 40px;
+    background: black;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/* Logo */
+#logo {
+    /*background: white;*/
+    display: inline-block;
+	height:100%;
+    float: left;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/* Navi informatiom */
+#publicnavigationbar{
+	height:40px;
+    font-size: 38px;
+    line-height: 100%;
+    min-width: 20%;
+    margin: auto;
+    text-align: center;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+.menuitem{
+    /*display: inline;*/
+    padding: 0 5px;
+    margin: 0 5px;
+    height: 100%;
+    width: 50px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    cursor: pointer;
+    color: white;
+}
+.menuitem:hover{
+    border-top: solid thin white;
+}
+.itemActive{
+    border-top: solid thin white;
+}
+.menuitem a{
+    color: white;
+}
+
+article.article{
+    padding: 18px;
+    border-bottom: thin solid #ccc;
+}
+#content{
+    padding: 10px;
+}
+
