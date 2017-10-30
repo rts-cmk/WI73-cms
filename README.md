@@ -604,5 +604,27 @@ module.exports = {
 }
 ```
 
+Næste skridt er at oprette en javascript fil i `public/js` mappen. Jeg kalder filen menu.js. Den skal indeholde kode der sender en GET request til serveren.
+
+public/js/menu.js
+```javascript
+fetch('/menuitems')
+    .then(function(data){
+        return data.json()
+    })
+    .then(function(menuitems){
+        var menu = '';
+        menuitems.forEach(function(item){
+            menu += '<span class="menuitem">' + item.name + '</span>';
+        });
+        document.querySelector('#publicnavigationbar').innerHTML = menu;
+    })
+    .catch(function(err){
+        console.log(err);
+    });
+```
+
+Koden sender en GET request til `/menuitems`. Serveren svarer tilbage med en array struktur med JSON elementer der indeholder menupunkterne. Arrayet gennemløbes i et forEach-loop der genererer en række html elementer, her span elementer, der indeholder menuteksten. Til sidst indsættes html elementerne i menubaren der her er et html div med id="publicnavigationbar".
+
 
 Fortsættes...
