@@ -3,10 +3,10 @@
 ## Indhold.
 * [1. del simpelt API](#simpleAPI)
 * [2. del statiske filer](#publicStatic)
-* 3. del database
+* [3. del database](#database)
 
-
-### 1. Del. <a name="simpleAPI"></a>
+<a name="simpleAPI"></a>
+### 1. Del. 
 
 
 ### Indledningsvis vil vi starte med at demonstrere et simpelt API
@@ -215,7 +215,8 @@ module.exports = function(req, res){
 
 Vi har nu et simpelt API der er i stand til at svare på både `GET` og `POST` request. Det er nu op til dig at udvide dette API til også at kunne håndtere andre requesttyper fx. `PUT` og `DELETE`. Prøv også at tilføje en route, fx. `/and` der svarer `Rap-rap` på indkommende request.
 
-### 2. del. Statiske filer <a name="publicStatic"></a>
+<a name="publicStatic"></a>
+### 2. del. Statiske filer 
 
 Vores API kan ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre. 
 
@@ -452,7 +453,7 @@ module.exports = function (req, res) {
     helpers.respond(res, 'Route findes ikke', 404);
 };
 ```
-
+<a name="database"></a>
 ### 3. Del. Databasen.
 
 I vores CMS får vi brug for at opbevare data. Til det formål skal vi oprette en database med de nødvendige tabeller.
