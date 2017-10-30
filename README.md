@@ -1,3 +1,4 @@
+<a name="top"></top>
 # CMS bygget med Node.js
 
 ## Indhold.
@@ -215,7 +216,7 @@ module.exports = function(req, res){
 
 Vi har nu et simpelt API der er i stand til at svare på både `GET` og `POST` request. Det er nu op til dig at udvide dette API til også at kunne håndtere andre requesttyper fx. `PUT` og `DELETE`. Prøv også at tilføje en route, fx. `/and` der svarer `Rap-rap` på indkommende request.
 
-<a name="publicStatic"></a>
+<a name="publicStatic"></a>[^ tilbage](#top)
 ### 2. del. Statiske filer 
 
 Vores API kan ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre. 
