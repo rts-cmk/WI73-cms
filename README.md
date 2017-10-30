@@ -1,6 +1,12 @@
 # CMS bygget med Node.js
 
-### 1. Del.
+## Indhold.
+* [1. del simpelt API](#simpleAPI)
+* [2. del statiske filer](#publicStatic)
+* 3. del database
+
+
+### 1. Del. <a name="simpleAPI"></a>
 
 
 ### Indledningsvis vil vi starte med at demonstrere et simpelt API
@@ -209,7 +215,7 @@ module.exports = function(req, res){
 
 Vi har nu et simpelt API der er i stand til at svare på både `GET` og `POST` request. Det er nu op til dig at udvide dette API til også at kunne håndtere andre requesttyper fx. `PUT` og `DELETE`. Prøv også at tilføje en route, fx. `/and` der svarer `Rap-rap` på indkommende request.
 
-### 2. del. Statiske filer
+### 2. del. Statiske filer <a name="publicStatic"></a>
 
 Vores API kan ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre. 
 
@@ -624,7 +630,10 @@ fetch('/menuitems')
     });
 ```
 
-Koden sender en GET request til `/menuitems`. Serveren svarer tilbage med en array struktur med JSON elementer der indeholder menupunkterne. Arrayet gennemløbes i et forEach-loop der genererer en række html elementer, her span elementer, der indeholder menuteksten. Til sidst indsættes html elementerne i menubaren der her er et html div med id="publicnavigationbar".
+Koden sender en GET request til `/menuitems`. Serveren svarer tilbage med en array struktur med JSON elementer der indeholder menupunkterne. Arrayet gennemløbes i et forEach-loop der genererer en række html elementer, her span elementer, der indeholder menuteksten. Til sidst indsættes html elementerne i menubaren, der her er et html div med id="publicnavigationbar".
 
+Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi vil kunne oprette, ændre eller fjerne menupunkter fra databasen, og dermed i vores index.html.
+
+For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.
 
 Fortsættes...
