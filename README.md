@@ -639,6 +639,7 @@ Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi v
 
 For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.
 
+
 <a name="login"></a>[^ tilbage](#top)
 ### Login
 Vores loginsystem anvender _cookies_. Men først en lille gennemgang af hvad cookies er for en størrelse.
