@@ -1,9 +1,9 @@
 # CMS bygget med Node.js
 
 ## Indhold.
-* [1. del simpelt API](#simpleAPI)
-* [2. del statiske filer](#publicStatic)
-* [3. del database](#database)
+* [1. del - simpelt API](#simpleAPI)
+* [2. del - statiske filer](#publicStatic)
+* [3. del - database](#database)
 
 <a name="simpleAPI"></a>
 ### 1. Del. 
