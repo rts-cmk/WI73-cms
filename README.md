@@ -455,7 +455,7 @@ module.exports = function (req, res) {
 };
 ```
 <a name="database"></a>
-### 3. Del. Databasen.
+### 3. Del. Databasen.[^ tilbage](#top)
 
 I vores CMS får vi brug for at opbevare data. Til det formål skal vi oprette en database med de nødvendige tabeller.
 Der findes mange databasesystemer at vælge i mellem. Jeg har valgt at bruge MySQL.
