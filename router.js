@@ -28,13 +28,12 @@ module.exports = function (req, res) {
         var handler = action[method];
 
         if (handler){
-            handler(res);
+            handler(req, res);
         }
         else{
             helpers.respond(res, `Metode ${req.method} ikke tilladt`, 404);
             return;
         }
-        // action(res);
         return;
     }
     // Hvis vi er her er der ikke fundet en route
