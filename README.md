@@ -688,6 +688,27 @@ function getCookies(req) {
 } 
 ```
 
-Hvis der ikke eksisteren en cookie, vil funktionen returnere et tomt objekt.
+Funktionen tager et request objekt som parameter og returnerer et objekt med de cookies der blev modtaget af serveren.
+Hvis der ikke blev modtaget nogen cookie, vil funktionen returnere et tomt objekt.
+
+Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data der submittes til serveren som en POST request.
+
+Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.
+
+Eksempel
+```javascript
+function(req, callback){
+    var userdata = '';
+    req.on('data', function(data){  // bruger 'data' eventen...
+        userdata += data;   // ...til at trække formdata ind i variablen 'userdata'
+    });
+    req.on('end', function(){   // 
+        var formData = qs.parse(userdata);
+        callback(formData);
+    });
+};
+```
+
+Funktionen tager et request objekt og en callback funktion. Ved indkommende data vil 'data' eventen indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion der ved hjælp af `querystring` mudulet parser `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
 
 Fortsættes...
