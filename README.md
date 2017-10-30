@@ -5,6 +5,7 @@
 * [1. del - simpelt API](#simpleAPI)
 * [2. del - statiske filer](#publicStatic)
 * [3. del - database](#database)
+* [4. del - login](#login)
 
 <a name="simpleAPI"></a>
 ### 1. Del. 
@@ -454,8 +455,8 @@ module.exports = function (req, res) {
     helpers.respond(res, 'Route findes ikke', 404);
 };
 ```
-<a name="database"></a>
-### 3. Del. Databasen.[^ tilbage](#top)
+<a name="database"></a>[^ tilbage](#top)
+### 3. Del. Databasen.
 
 I vores CMS får vi brug for at opbevare data. Til det formål skal vi oprette en database med de nødvendige tabeller.
 Der findes mange databasesystemer at vælge i mellem. Jeg har valgt at bruge MySQL.
@@ -637,5 +638,7 @@ Koden sender en GET request til `/menuitems`. Serveren svarer tilbage med en arr
 Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi vil kunne oprette, ændre eller fjerne menupunkter fra databasen, og dermed i vores index.html.
 
 For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.
+
+<a name="login"></a>
 
 Fortsættes...
