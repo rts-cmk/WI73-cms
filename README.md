@@ -640,5 +640,29 @@ Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi v
 For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.
 
 <a name="login"></a>
+### Login
+Vores loginsystem anvender _cookies_. Men først en lille gennemgang af hvad cookies er for en størrelse.
+
+Cookies er i bund og grund ikke andet end en stump tekst. Typisk organsiseret som et eller flere _name/value_ par. Via http headere, kan vi sende cookies til en browser, ligesom browseren også er i stand til at sende cookies via http headere. Når en eller flere cookies modtages af en browser, lagrer den disse og holder styr på hvilket domæne hver enkelt cookie tilhører. Når browseren igen sender en http request til en server vil den automatisk medsende de cookies der tilhører det pågældende domæne. Cookies der er oprettet af andre domæner vil ikke blive sendt med. Kun cookies der 'tilhører' domænet. På den måde er det muligt for browseren at gemme information om de enkelte domæner i cookies. En måde at anvende cookies på, er i forbindelse med login. Hvis en bruger er logget ind kan man lade en cookie indholde information der kan verificere, at brugeren er logget ind. 
+
+Det er også muligt at sætte et `expire` timestamp for hver enkelt cookie. Når dette timestamp overskrides, vil browseren automatisk slette den pågældende cookie.
+
+Når vi skal oprette en eller flere cookies kan vi gøre det sådan:
+Eksempel.
+```javascript
+var cookieValue1 = 'Værdi1', cookieValue2 = 'Værdi2'
+response.setHeader('Set-Cookie', ['cookie1=' + cookieValue1, 'cookie2=' + cookieValue2]);
+```
+
+I eksemplet sætter vi en HTTP header med to cookies, `cookie1` og `cookie2` med værdierne i de to foruddefinerede variabler, `cookieValue1` og `cookivalue2`
+
+Hvis vi ønsker at sætte en `expire` timestamp for en cookie, kan vi gøre det således:
+```javascript
+response.setHeader('Set-Cookie', ['id=1234'; expire=2017-12-24T23:59:59.000Z]);
+```
+
+Denne cookie, der har navnet 'id' og værdien '1234', vil udløbe juleaften et sekund før midnat. 
+
+
 
 Fortsættes...
