@@ -664,6 +664,30 @@ response.setHeader('Set-Cookie', ['id=1234'; expire=2017-12-24T23:59:59.000Z]);
 
 Denne cookie, der har navnet 'id' og værdien '1234', vil udløbe juleaften et sekund før midnat. 
 
+Men vi får også brug for at kunne læse indkommende cookies på serveren. Vi kan hente den 'rå' cookietekst fra request objektet.
 
+```javascript
+var cookie = request.headers.cookie;
+```
+
+Lad os skrive koden til `cookieparser` funktion
+```javascript
+function getCookies(req) { 
+    var cookies = {}, cookieParts = [];
+
+    // Hvis der eksisterer en (eller flere) cookies...
+    if(req.headers.cookie){
+        cookies.raw = req.headers.cookie;   // hent den 'rå' cookie
+        cookieParts = cookies.raw.split(';') {
+        cookieParts.forEach(function(elm){
+            var name = decodeURI(elm.split('=').trim()[0]) // navne-delen af cookien
+            var value = decodeURI(elm.split('=').trim()[1]) // værdi-delen af cookien
+            cookies[name] = value; // indsæt delene i cookies-objektet
+    }); 
+    return cookies; // Returner objektet
+} 
+```
+
+Hvis der ikke eksisteren en cookie, vil funktionen returnere et tomt objekt.
 
 Fortsættes...
