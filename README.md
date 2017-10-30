@@ -500,7 +500,7 @@ Brugeren skal også have CRUD rettigheder til alle tabeller i `demo-cms` databas
 GRANT SELECT, INSERT, UPDATE, DELETE ON demo-cms.* TO 'wwwuser'@'localhost';
 ```
 
-For at få adgang til databasen fra node.js skal vi bruge et 3. parts modul. Dette vil være det eneste 3. parts modul vi får brug for. Modulet er `mysql2.js`. Vi installerer modulet med npm: `npm install --save mysql2`
+For at få adgang til databasen fra node.js skal vi bruge et 3. parts modul. Modulet er `mysql2.js`. Vi installerer modulet med npm: `npm install --save mysql2`
 
 Nu skal vi oprette en ny mappe til de javascript filer der skal håndtere databasen.
 
@@ -578,5 +578,31 @@ exports.select = function(res, sql, callback){
     })
 }
 ```
+
+Menutabellen i databasen skal som sagt indeholde de menupunkter vi ønsker at få vist på `index.html`. Vi skal tilføje noget kode for at få menuen til at virke.
+
+Først skal vi oprette en route, `menuitems`. Denne route skal kunne håndtere `GET` requests fra browseren. 
+
+Filen `router.js` skal derfor have denne tilføjelse til de routes der allerede findes:
+```javascript
+   '/menuitems' : require('./endpointhandlers/menuitems')
+```
+
+Vi skal også oprette en fil i `endpointhandlers` mappen. Jeg vælger at kalde filen `menuitems.js`.
+Indholdet i denne fil ser sådan ud:
+```javascript
+const helpers = require('./../helpers');
+const database = require('./../data/database');
+
+module.exports = {
+    'GET' : function(req, res){
+        var sql = "SELECT * FROM menu ORDER BY position";
+        database.menuselect(res, sql, function(data){
+            helpers.respond(res, data);
+        });
+    }
+}
+```
+
 
 Fortsættes...
