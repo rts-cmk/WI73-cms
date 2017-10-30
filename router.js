@@ -3,8 +3,8 @@ const helpers = require('./helpers');
 
 const routes = {
     '/cat': require('./endpointhandlers/cat'),
-
-    '/dog': require('./endpointhandlers/dog')
+    '/dog': require('./endpointhandlers/dog'),
+    '/menuitems' : require('./endpointhandlers/menuitems')
 };
 
 module.exports = function (req, res) {
@@ -21,7 +21,6 @@ module.exports = function (req, res) {
         helpers.fileRespond(res, 'public' + regexFile[0]);
         return;
     }
-    // console.log(regexFile[0]);
     
     var action = routes[pathname];
     if (action) {
