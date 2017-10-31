@@ -697,7 +697,7 @@ Når en form submittes til serveren vil request objektets 'data' og 'end' events
 
 Eksempel
 ```javascript
-function(req, callback){
+function getFormData(req, callback){
     var userdata = '';
     req.on('data', function(data){  // bruger 'data' eventen...
         userdata += data;   // ...til at trække formdata ind i variablen 'userdata'
@@ -710,5 +710,55 @@ function(req, callback){
 ```
 
 Funktionen tager et request objekt og en callback funktion. Ved indkommende data vil 'data' eventen indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion der ved hjælp af `querystring` mudulet parser `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
+
+Både `getCookies()` og `getFormData()` funktionerne er tilføjede i `helpers.js` filen. Derfra exporteres de.
+
+Tilføjet til `helpers.js`
+´´´javascript
+exports.getCookies = function(req){
+    var cookies = {}, cookieParts = [];
+    if(req.headers.cookie){
+        cookies.raw = req.headers.cookie;
+        cookieParts = cookies.raw.split(';');
+        cookieParts.forEach(function(cp){
+            var name = decodeURI(cp.split('=')[0].trim());
+            var value = decodeURI(cp.split('=')[1].trim());
+            cookies[name] = value;
+        })
+    }
+    return cookies;
+}
+
+
+
+// REDIRECT 302, {location:'url'}
+exports.redirect = function(res, url){
+    res.writeHead(302, {'location': url});
+    res.end();
+}
+
+exports.getFormData = function(req, callback){
+    var userData = '';
+    var formData;
+    req.on('data', function(d){
+        userData += d;
+    });
+    req.on('end', function(){
+        formData = qs.parse(userData);
+        callback(formData);
+    });
+}
+
+exports.logger = function(req){
+    var logTxt = new Date().toString();
+        logTxt += `; From: ${req.connection.remoteAddress}`;
+        logTxt += `; URL: ${req.url}`;
+        logTxt += `; Method: ${req.method}`;
+        logTxt += `; Cookies: ${req.headers.cookie}`;
+    console.log(logTxt);
+}
+
+```
+
 
 Fortsættes...
