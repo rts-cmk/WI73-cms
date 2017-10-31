@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <style>
+        #loginform{
+            width: 300px;
+            margin: 50px auto 50px auto;
+            padding: 50px;
+            border: thin solid red;
+        }
+        #loginform .inputElements{
+            display: block;
+            text-align: center;
+            margin: 4px auto;
+        }
+        .msg {
+            text-align:center;
+            color:red
+        }
+        h4 {
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <form id="loginform" method="post" action="/login">
+                <h4>Login påkrævet</h4>
+                
+                
+                <!--msg-->
+                <input class="inputElements" type="text" name="username" placeholder="Brugernavn" autofocus value="admin">
+                <input class="inputElements" type="password" name="password" placeholder="Kodeord" value="admin">
+                <button class="inputElements" type="submit">Login</button>
+        </form>
+    </main>
+</body>
+</html>
