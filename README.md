@@ -644,7 +644,7 @@ For at brugere skal få adgang til administrationssiden, skal de først gennem e
 ### Login
 Vores loginsystem anvender _cookies_. Men først en lille gennemgang af hvad cookies er for en størrelse.
 
-Cookies er i bund og grund ikke andet end en stump tekst. Typisk organsiseret som et eller flere _name/value_ par. Via http headere, kan vi sende cookies til en browser, ligesom browseren også er i stand til at sende cookies via http headere. Når en eller flere cookies modtages af en browser, lagrer den disse og holder styr på hvilket domæne hver enkelt cookie tilhører. Når browseren igen sender en http request til en server vil den automatisk medsende de cookies der tilhører det pågældende domæne. Cookies der er oprettet af andre domæner vil ikke blive sendt med. Kun cookies der 'tilhører' domænet. På den måde er det muligt for browseren at gemme information om de enkelte domæner i cookies. En måde at anvende cookies på, er i forbindelse med login. Hvis en bruger er logget ind kan man lade en cookie indholde information der kan verificere, at brugeren er logget ind. 
+Cookies er i bund og grund ikke andet end en stump tekst. Typisk organiseret som et eller flere _name/value_ par. Via http headere, kan vi sende cookies til en browser, ligesom browseren også er i stand til at sende cookies via http headere. Når en eller flere cookies modtages af en browser, lagrer den disse og holder styr på hvilket domæne hver enkelt cookie tilhører. Når browseren igen sender en http request til en server vil den automatisk medsende de cookies der tilhører det pågældende domæne. Cookies der er oprettet af andre domæner vil ikke blive sendt med. Kun cookies der 'tilhører' domænet. På den måde er det muligt for browseren at gemme information om de enkelte domæner i cookies. En måde at anvende cookies på, er i forbindelse med login. Hvis en bruger er logget ind kan man lade en cookie indholde information der kan verificere, at brugeren er logget ind. 
 
 Det er også muligt at sætte et `expire` timestamp for hver enkelt cookie. Når dette timestamp overskrides, vil browseren automatisk slette den pågældende cookie.
 
@@ -709,9 +709,9 @@ function getFormData(req, callback){
 };
 ```
 
-Funktionen tager et request objekt og en callback funktion. Ved indkommende data vil 'data' eventen indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion der ved hjælp af `querystring` mudulet parser `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
+Funktionen tager to parametre, et request objekt og en callback funktion. Ved indkommende data vil request objektets 'data' event indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion. Denne funktion bruger `querystring` mudulet til at parse `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
 
-Både `getCookies()` og `getFormData()` funktionerne er tilføjede i `helpers.js` filen. Derfra exporteres de.
+Både `getCookies()` og `getFormData()` funktionerne skal tilføjes til `helpers.js` filen.
 
 Tilføjet til `helpers.js`
 ```javascript
