@@ -714,7 +714,7 @@ Funktionen tager et request objekt og en callback funktion. Ved indkommende data
 Både `getCookies()` og `getFormData()` funktionerne er tilføjede i `helpers.js` filen. Derfra exporteres de.
 
 Tilføjet til `helpers.js`
-javascript
+```javascript
 exports.getCookies = function(req){
     var cookies = {}, cookieParts = [];
     if(req.headers.cookie){
