@@ -251,7 +251,7 @@ Koden til funktionen der skal læse en fil fra filsystemet sende den til browser
 
 Her er koden
 ```javascript
-exports.fileRespond = funktion(res, fileName){
+exports.fileRespond = function(res, fileName){
     fs.readFile(fileName, function(err, fileContent){
         if(err){
             // Hvis der opstod en fejl, er vi her.
