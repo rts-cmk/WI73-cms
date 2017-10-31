@@ -4,7 +4,8 @@ const helpers = require('./helpers');
 const routes = {
     '/cat': require('./endpointhandlers/cat'),
     '/dog': require('./endpointhandlers/dog'),
-    '/menuitems' : require('./endpointhandlers/menuitems')
+    '/menuitems' : require('./endpointhandlers/menuitems'),
+    '/login' : require('./endpointhandlers/login'),
 };
 
 module.exports = function (req, res) {
