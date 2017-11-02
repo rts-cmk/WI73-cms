@@ -1,5 +1,6 @@
 <a name="top"></top>
 # CMS bygget med Node.js
+### Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og udgør ikke et produktionsklart system.
 
 ## Indhold.
 * [1. del - simpelt API](#simpleAPI)
@@ -746,15 +747,22 @@ exports.getFormData = function(req, callback){
         callback(formData);
     });
 }
+```
+Mens man udvikler er det en god hjælp, at alle indkommende requests udskrives på server terminalen. Derfor har jeg tilføjet en funktion, `logger()`, i `helpers.js`.
 
+Koden til `logger()` er gengivet her:
+```javascript
 exports.logger = function(req){
+    var c = req.headers.cookie ? req.headers.cookie : 'None'
     var logTxt = new Date().toString();
         logTxt += `; From: ${req.connection.remoteAddress}`;
         logTxt += `; URL: ${req.url}`;
         logTxt += `; Method: ${req.method}`;
-        logTxt += `; Cookies: ${req.headers.cookie}`;
+        logTxt += '; cookies: ' + c;
     console.log(logTxt);
 }
 ```
+
+Det næste vi går i gang drejer sig om brugerfladen, nærmere betegnet clientside javascript. Det skal være tydeligt for brugeren, hvilken knap brugeren sidst har klikket på. Til det formål har jeg i CSS filen lavet en class `itemActive`. Denne class skal så tilføjes den knap der klikkes på. Når der klikkes på en anden knap, skal den fjernes fra den forrige knap tilføjes til knappen der blev klikket på.
 
 Fortsættes...
