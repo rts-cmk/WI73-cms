@@ -629,12 +629,17 @@ fetch('/menuitems')
         });
         document.querySelector('#publicnavigationbar').innerHTML = menu;
     })
+    .then(function () {
+        document.querySelector('.menuitem').click();  // Simuler et museklik ved at aktivere click eventen.
+    })
     .catch(function(err){
         console.log(err);
     });
 ```
 
 Koden sender en GET request til `/menuitems`. Serveren svarer tilbage med en array struktur med JSON elementer der indeholder menupunkterne. Arrayet gennemløbes i et forEach-loop der genererer en række html elementer, her span elementer, der indeholder menuteksten. Til sidst indsættes html elementerne i menubaren, der her er et html div med id="publicnavigationbar".
+
+Læg mærke til at koden indeholder tre `.then()` blokke. Den sidste blok henter en reference til det første element der har klassen `menuitem` og simulerer et museklik på elementet. Det medfører at når brugeren kommer ind på siden 1. gang vil artiklerne der hører til dette 1. menupunkt blive vist.
 
 Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi vil kunne oprette, ændre eller fjerne menupunkter fra databasen, og dermed i vores index.html.
 
@@ -680,10 +685,12 @@ function getCookies(req) {
     if(req.headers.cookie){
         cookies.raw = req.headers.cookie;   // hent den 'rå' cookie
         cookieParts = cookies.raw.split(';') {
-        cookieParts.forEach(function(elm){
-            var name = decodeURI(elm.split('=').trim()[0]) // navne-delen af cookien
-            var value = decodeURI(elm.split('=').trim()[1]) // værdi-delen af cookien
-            cookies[name] = value; // indsæt delene i cookies-objektet
+        cookieParts.forEach(function(part){
+            if(part.match(/=/){
+                var name = decodeURI(part.split('=').trim()[0]) // navne-delen af cookien
+                var value = decodeURI(part.split('=').trim()[1]) // værdi-delen af cookien
+                cookies[name] = value; // indsæt delene i cookies-objektet
+            }
     }); 
     return cookies; // Returner objektet
 } 
@@ -694,8 +701,8 @@ Hvis der ikke blev modtaget nogen cookie, vil funktionen returnere et tomt objek
 
 Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data der submittes til serveren som en POST request.
 
-Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.
-
+~~Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.~~
+<del>
 Eksempel
 ```javascript
 function getFormData(req, callback){
@@ -709,7 +716,7 @@ function getFormData(req, callback){
     });
 };
 ```
-
+</del>
 Funktionen tager to parametre, et request objekt og en callback funktion. Ved indkommende data vil request objektets 'data' event indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion. Denne funktion bruger `querystring` mudulet til at parse `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
 
 Både `getCookies()` og `getFormData()` funktionerne skal tilføjes til `helpers.js` filen.
