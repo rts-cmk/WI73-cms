@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="../misc/favicon.ico" type="image/x-icon">
+    <title>Admin</title>
+</head>
+<body>
+    <main>
+        <header id="adminheader">
+            <span id="logo"><img src="img/logo.png" alt=""></span><div id="title">Dashboard</div>
+        </header>
+        <nav id="adminnavigationbar">
+            <div data-cmd="categories" class="menuitem">Kategorier</div>
+            <div data-cmd="article" class="menuitem">Ny artikel</div>
+            <div data-cmd="edit" class="menuitem">Rediger</div>
+            <div data-cmd="users" class="menuitem">Brugere</div>
+            <a class="menuitem" href="/" target="_blank">Vis</a>
+            <div data-cmd="logout" class="menuitem">Logout</div>
+            <!-- <a class="menuitem" href="../logout">Logout</a> -->
+        </nav>
+        <section id="content">Vælg fra menuen til venstre</section>
+    </main>
+    <script src="js/menuclick.js"></script>
+    <!-- <script src="js/adminClientController.js"></script> -->
+</body>
+</html>

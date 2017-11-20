@@ -1,47 +1,48 @@
-const helpers = require('./helpers');
 const url = require('url');
-const routes = {
-    '/cat' : require('./endpointhandlers/cat'),
-    '/dog' : require('./endpointhandlers/dog'),
-    '/menuitems' : require('./endpointhandlers/menuitems'),
-    '/login' : require('./endpointhandlers/login'),
-    '/article' : require('./endpointhandlers/article')
-    // '/test' : require('./endpointhandlers/test')
+const helpers = require('./helpers');
+const routes = require('./routedefinitions');
 
-};
-
-
-module.exports = function(req, res){
+module.exports = function (req, res) {
     helpers.logger(req);
     var pathname = url.parse(req.url).pathname;
 
-    if(pathname == '/'){
-      helpers.fileRespond(res, 'public/index.html'); 
-      return;   
-    }
-
-    var regexFile = pathname.match(/^\/(img\/|css\/|js\/)?[\w-]+\.(html|css|png|js|jpg)$/);
+    var regexFile = pathname.match(/^\/((css|js|img)\/)?\w+\.(html|css|js|png)$/);
     if(regexFile){
         helpers.fileRespond(res, 'public' + regexFile[0]);
         return;
     }
+    // Vi skal undersøge om der requestes en fil fra admin-mappen
+    var rx = /^\/(admin\/(img\/|css\/|js\/)?[\w-]+\.(html|png|js|css))$/i;
+    var adminFile = pathname.match(rx);
+    if(adminFile){
+        // Hvis der requestes for en fil i admin-mapen er det nødvendigt at 
+        // at checkke om brugersessionen er gyldig.
+        var cookie = helpers.getCookies(req);
+        database.verifySession(res, cookie, function(data){
+            if(helpers.objEmpty(data)){
+                helpers.redirect(res, '/')
+                return;
+            }
+            helpers.fileRespond(res, adminFile[1]);
+        });
+        return;
+    }
 
-    var method = req.method
-    var handler = routes[pathname]; // hent handleren (hvis vi har en)
-    if(handler){
-        // Hvis vi er her er der fundet en handler..
-        var action = handler[method]; // Hent metode (hvis vi har en der matcher)
-        if(action){
-            // Hvis vi er her er der fundet en metode-handler
-            action(req, res);    // Eksekver metodehandleren
+
+    var action = routes[pathname];
+    if (action) {
+        var method = req.method;
+        var handler = action[method];
+
+        if (handler){
+            handler(req, res);
         }
         else{
-            // Hvis vi er her er der ikke fundet en metodehandler
-            helpers.respond(res, 'Metode ikke tilladt', 404);    
+            helpers.respond(res, `Metode ${req.method} ikke tilladt`, 404);
+            return;
         }
+        return;
     }
-    else{
-        // Hvis vi er her er der ikke fundet en handler
-        helpers.respond(res, 'Ressource findes ikke', 404);
-    }
+    // Hvis vi er her er der ikke fundet en route
+    helpers.respond(res, 'Route findes ikke', 404);
 };
