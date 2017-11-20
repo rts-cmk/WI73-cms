@@ -1,9 +1,10 @@
+// Alle routes er definerede her. Filen burde være en selvstændig fil.
 module.exports = {
-    '/' : require('./endpointhandlers/home'),
-    '/article' : require('./endpointhandlers/article'),
-    '/cat': require('./endpointhandlers/cat'),
-    '/test': require('./endpointhandlers/test'),
-    '/dog': require('./endpointhandlers/dog'),
-    '/menuitems': require('./endpointhandlers/menuitems'),
-    '/login' : require('./endpointhandlers/login')
-};
+    '/cat'          : require('./endpointhandlers/cat'),        // Test route i forbindelse med intro
+    '/dog'          : require('./endpointhandlers/dog'),        // Test route i forbindelse med intro
+    '/menuitems'    : require('./endpointhandlers/menuitems'),  // Henter menupunkter fra DB
+    '/test'         : require('./endpointhandlers/test'),       // Test route
+    '/login'        : require('./endpointhandlers/login'),      // Login route, handler håndterer både GET og POST
+    '/article'      : require('./endpointhandlers/article'),    // Article route handler håndterer GET, POST, 
+    '/logout'       : require('./endpointhandlers/logout'),     // Logout route handler håndterer DELETE
+}
