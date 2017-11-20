@@ -701,23 +701,41 @@ Hvis der ikke blev modtaget nogen cookie, vil funktionen returnere et tomt objek
 
 Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data der submittes til serveren som en POST request.
 
-~~Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.~~
-<del>
-Eksempel
+~~Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.~~~
+
+Efter en del overvejelser har jeg besluttet at bruge et tredieparts modul til at læse indkommende formdata. Blandt de mange muligheder der findes, har jeg valgt at bruge modulet `multiparty`. Dette modul har en simpel API, er namt at bruge og har kun en enkelt dependency. Det betyder at når man installerer dette modul vil det kun være enkelt modul der yderligere bliver installeret. Jo færre dependencies, jo bedre.
+
+Eksempel:
 ```javascript
-function getFormData(req, callback){
-    var userdata = '';
-    req.on('data', function(data){  // bruger 'data' eventen...
-        userdata += data;   // ...til at trække formdata ind i variablen 'userdata'
+function getFormData = function(req, res, callback){
+    var form = new multiparty.Form();
+
+    form.parse(req, function(err, fields, files){
+        if(err){
+            exports.respond(res, {besked: 'Der opstod en fejl'}, 404);
+            console.log(err);
+            return;
+        }
+        callback(fields, files);
     });
-    req.on('end', function(){   // 
-        var formData = qs.parse(userdata);
-        callback(formData);
-    });
+    
 };
+// Oprindelig kode er udkommenteret
+// function getFormData(req, callback){
+//    var userdata = '';
+//    req.on('data', function(data){  // bruger 'data' eventen...
+//        userdata += data;   // ...til at trække formdata ind i variablen 'userdata'
+//    });
+//    req.on('end', function(){   // 
+//        var formData = qs.parse(userdata);
+//        callback(formData);
+//    });
+//};
 ```
-</del>
-Funktionen tager to parametre, et request objekt og en callback funktion. Ved indkommende data vil request objektets 'data' event indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion. Denne funktion bruger `querystring` mudulet til at parse `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.
+
+~~Funktionen tager to parametre, request objektet og en callback funktion. Ved indkommende data vil request objektets 'data' event indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen `userData` Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion. Denne funktion bruger `querystring` mudulet til at parse `userData` og placerer resultatet i variablen `formData`. Tilsidst fodres callback funktionen med denne variabel.~~~
+
+Funktionen tager tre parametre, request og response objekterne og en callback funktion. Ved indkommende data vil `multiparty` parse indkommende data fra `request` objektet og placere resultaterne i variablene `fields` og `files`, hvor `fields` indeholder form data og `files` indholder uploadede filer. Tilsidst fodres callback funktionen med disse variable.
 
 Både `getCookies()` og `getFormData()` funktionerne skal tilføjes til `helpers.js` filen.
 
@@ -743,7 +761,18 @@ exports.redirect = function(res, url){
     res.end();
 }
 
-exports.getFormData = function(req, callback){
+exports.getFormData = function(req, res, callback){
+    var form = new multiparty.Form();
+    form.parse(req, function(err, fields, files){
+        if(err){
+            exports.respond(res, {besked: 'Der opstod en fejl'}, 404);
+            console.log(err);
+            return;
+        }
+        callback(fields, files);
+    });
+};
+
     var userData = '';
     var formData;
     req.on('data', function(d){
@@ -755,21 +784,25 @@ exports.getFormData = function(req, callback){
     });
 }
 ```
-Mens man udvikler er det en god hjælp, at alle indkommende requests udskrives på server terminalen. Derfor har jeg tilføjet en funktion, `logger()`, i `helpers.js`.
+Mens man udvikler er det en god hjælp, at alle indkommende requests udskrives på server terminalen. Derfor har jeg tilføjet et modul, `logger`, i filem `logger.js`. Modulet udskriver forskellige informationer til konsollen. Det er muligt at styre hvilke informationer der logges ved hjælp af parameteren `level` der defaulter til 3
 
-Koden til `logger()` er gengivet her:
+Koden til `logger.js` er gengivet her:
 ```javascript
-exports.logger = function(req){
-    var c = req.headers.cookie ? req.headers.cookie : 'None'
+// LOGGER
+// level 0: Kun timestamp 
+// level 1: Timestamp og Remote-address
+// level 2: Timestamp, Remote-address og url
+// level 3: Timestamp, Remote-address, url og method (Default)
+// level 4: Timestamp, Remote-address, url method og cookies
+module.exports = function(req, level = 3){
+    var cookies = req.headers.cookie ? req.headers.cookie : 'none';
     var logTxt = new Date().toString();
-        logTxt += `; From: ${req.connection.remoteAddress}`;
-        logTxt += `; URL: ${req.url}`;
-        logTxt += `; Method: ${req.method}`;
-        logTxt += '; cookies: ' + c;
+        logTxt += level >= 1? `; From: ${req.connection.remoteAddress}` : '';
+        logTxt += level >= 2? `; URL: ${req.url}` : '';
+        logTxt += level >= 3? `; Method: ${req.method}` : '';
+        logTxt += level >= 4? `; Cookies: ${cookies}` : '';
     console.log(logTxt);
 }
 ```
-
-Det næste vi går i gang drejer sig om brugerfladen, nærmere betegnet clientside javascript. Det skal være tydeligt for brugeren, hvilken knap brugeren sidst har klikket på. Til det formål har jeg i CSS filen lavet en class `itemActive`. Denne class skal så tilføjes den knap der klikkes på. Når der klikkes på en anden knap, skal den fjernes fra den forrige knap tilføjes til knappen der blev klikket på.
 
 Fortsættes...
