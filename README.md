@@ -507,7 +507,7 @@ CREATE USER 'wwwuser'@'localhost' IDENTIFIED BY 'wwwuser';
 
 Brugeren skal også have CRUD rettigheder til alle tabeller i `demo-cms` databasen
 ```sql
-GRANT SELECT, INSERT, UPDATE, DELETE ON demo-cms.* TO 'wwwuser'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `demo-cms`.* TO 'wwwuser'@'localhost';
 ```
 
 For at få adgang til databasen fra node.js skal vi bruge et 3. parts modul. Modulet er `mysql2.js`. Vi installerer modulet med npm: `npm install --save mysql2`
