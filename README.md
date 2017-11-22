@@ -705,13 +705,11 @@ Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data d
 
 Efter en del overvejelser har jeg besluttet at bruge et tredieparts modul til at læse indkommende formdata. Blandt de mange muligheder der findes, har jeg valgt at bruge modulet `multiparty`. Dette modul har en simpel API, er namt at bruge og har kun en enkelt dependency. Det betyder at når man installerer dette modul vil det kun være enkelt modul der yderligere bliver installeret. Jo færre dependencies, jo bedre. I denne sammenhæng skal man huske at importere `multiparty` modulet i `helpers.js` filen med `require()` funktionen
 
-```
-const multiparty = require('multiparty');
-```
 
-
-Eksempel:
+Eksempel på anvendelse af multiparty:
 ```javascript
+const multiparty = require('multiparty');
+
 function getFormData = function(req, res, callback){
     var form = new multiparty.Form();
 
