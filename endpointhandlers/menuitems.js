@@ -12,12 +12,30 @@ module.exports = {
     },
 
     'POST' : function(req, res){
-        var params = helpers.getFormData(req, res, function(formData){
+        helpers.getFormData(req, res, function(formData){
             if(helpers.objEmpty(formData)){
                 helpers.respond(res, {besked : "Der opstod en fejl"}, 500)
                 return;
             }
-            
+            var sql = "insert into menu (name, position) values(?, ?)"
+            var values = [formData.catname, formData.catpos];
+            database.query(res, sql, values, function(data){
+                helpers.respond(res, data);
+            })
+        });
+    },
+
+    'DELETE' : function(req, res){
+        helpers.getFormData(req, res, function(formData){
+            if(helpers.objEmpty(formData)){
+                helpers.respond(res,{besked :  'Der opstod en fejl'}, 500);
+                return;
+            }
+            var sql = "delete from menu where id = ?";
+            var values = [formData.id];
+            database.query(res, sql, values, function(data){
+                helpers.respond(res, data);
+            });
         });
     },
 
@@ -39,7 +57,7 @@ module.exports = {
 
                 var values = [formData.catname, formData.catpos, formData.id]
                 var sql = "update menu set name = ?, position = ? where id = ?";
-                database.update(res, sql, values, function (data) {
+                database.query(res, sql, values, function (data) {
                     helpers.respond(res, data);
                 });
             });
