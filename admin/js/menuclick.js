@@ -25,6 +25,9 @@
             case 'catAdd':
                 catAdd(caller);
                 break;
+            case 'catDelete':
+                catDelete(caller)
+                break;
             case 'article':
                 break
             case 'users':
@@ -33,29 +36,6 @@
             default:
                 alert(caller);
         }
-    }
-
-    function catEdit(caller) {
-        var formId = caller.dataset.id
-        var frm = document.querySelector(`#${formId}`);
-        var frmData = new FormData(frm);
-        fetch('/menuitems', {
-            credentials: 'include',
-            method: 'put',
-            body: frmData
-        })
-            .then(function (data) {
-                document.querySelector('div[data-cmd="categories"]').click();
-                // return data.json();
-            })
-    }
-
-    function logout() {
-        fetch('/logout', { credentials: 'include', method: 'delete' })
-            .then(function () {
-                document.querySelector("#title").innerHTML = 'Du loggede af...';
-                setTimeout(function () { location.href = "/"; }, 1000);
-            });
     }
 
     function categories() {
@@ -112,15 +92,59 @@
             .catch(function (err) {
                 console.log(err);
             })
-    }
+    }    
 
     function catAdd(caller){
         var form = document.querySelector('#frmCatAdd');
         var formData = new FormData(form);
-        fetch()
-        // console.log(formData.getAll('catname'));
-        // alert(caller.dataset.cmd);
-        
+        fetch('/menuitems', {
+            credentials: 'include',
+            method: 'post',
+            body: formData
+        })
+            .then(function(){
+                document.querySelector('div[data-cmd="categories"]').click();
+            })
+            .catch(function(err){
+                console.log(err)
+            })
+    }
+
+    function catDelete(caller){
+        var formId = caller.dataset.id
+        var frm = document.querySelector(`#${formId}`);
+        var frmData = new FormData(frm);
+        fetch('/menuitems', {
+            credentials: 'include',
+            method: 'delete',
+            body: frmData
+        })
+        .then(function (data) {
+            document.querySelector('div[data-cmd="categories"]').click();
+        });
+    }
+
+    function catEdit(caller) {
+        var formId = caller.dataset.id
+        var frm = document.querySelector(`#${formId}`);
+        var frmData = new FormData(frm);
+        fetch('/menuitems', {
+            credentials: 'include',
+            method: 'put',
+            body: frmData
+        })
+            .then(function (data) {
+                document.querySelector('div[data-cmd="categories"]').click();
+                // return data.json();
+            })
+    }
+
+    function logout() {
+        fetch('/logout', { credentials: 'include', method: 'delete' })
+            .then(function () {
+                document.querySelector("#title").innerHTML = 'Du loggede af...';
+                setTimeout(function () { location.href = "/"; }, 1000);
+            });
     }
 
     // Interval-functtion der holder øje med om session-cookien stadig eksisterer
