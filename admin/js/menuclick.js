@@ -1,4 +1,3 @@
-
 (function () {
     document.addEventListener("click", menuclick, true);
 
@@ -25,8 +24,8 @@
             case 'catAdd':
                 catAdd(caller);
                 break;
-            case 'catDelete':
-                catDelete(caller)
+            case 'catDelete' :
+                catDelete(caller);
                 break;
             case 'article':
                 break
@@ -36,6 +35,47 @@
             default:
                 alert(caller);
         }
+    }
+
+    function catDelete(caller){
+        var formId = caller.dataset.id;
+        var form = document.querySelector(`#${formId}`);
+        var formData = new FormData(form);
+        fetch('/menuitems',{
+            method : 'delete', 
+            credentials: 'include',
+            body : formData
+        })
+        .then(function (data) {
+            document.querySelector('div[data-cmd="categories"]').click();
+        })        
+        .catch(function(err){
+            console.log(err);
+        });
+     
+    }
+
+    function catEdit(caller) {
+        var formId = caller.dataset.id
+        var frm = document.querySelector(`#${formId}`);
+        var frmData = new FormData(frm);
+        fetch('/menuitems', {
+            credentials: 'include',
+            method: 'put',
+            body: frmData
+        })
+            .then(function (data) {
+                document.querySelector('div[data-cmd="categories"]').click();
+                // return data.json();
+            })
+    }
+
+    function logout() {
+        fetch('/logout', { credentials: 'include', method: 'delete' })
+            .then(function () {
+                document.querySelector("#title").innerHTML = 'Du loggede af...';
+                setTimeout(function () { location.href = "/"; }, 1000);
+            });
     }
 
     function categories() {
@@ -84,67 +124,29 @@
                                     </div>
                                 </div>
                             <form>`;
-
-                // content += `<br><button type="button" data-cmd="catAdd" style="width:99%">Tilføj menupunkt</button>`
                 content += `</div>`;
                 document.querySelector('#content').innerHTML = content;
             })
             .catch(function (err) {
                 console.log(err);
             })
-    }    
+    }
 
     function catAdd(caller){
         var form = document.querySelector('#frmCatAdd');
         var formData = new FormData(form);
-        fetch('/menuitems', {
+        fetch('/menuitems',{
+            method : 'post', 
             credentials: 'include',
-            method: 'post',
-            body: formData
-        })
-            .then(function(){
-                document.querySelector('div[data-cmd="categories"]').click();
-            })
-            .catch(function(err){
-                console.log(err)
-            })
-    }
-
-    function catDelete(caller){
-        var formId = caller.dataset.id
-        var frm = document.querySelector(`#${formId}`);
-        var frmData = new FormData(frm);
-        fetch('/menuitems', {
-            credentials: 'include',
-            method: 'delete',
-            body: frmData
+            body : formData
         })
         .then(function (data) {
             document.querySelector('div[data-cmd="categories"]').click();
+        })        
+        .catch(function(err){
+            console.log(err);
         });
-    }
-
-    function catEdit(caller) {
-        var formId = caller.dataset.id
-        var frm = document.querySelector(`#${formId}`);
-        var frmData = new FormData(frm);
-        fetch('/menuitems', {
-            credentials: 'include',
-            method: 'put',
-            body: frmData
-        })
-            .then(function (data) {
-                document.querySelector('div[data-cmd="categories"]').click();
-                // return data.json();
-            })
-    }
-
-    function logout() {
-        fetch('/logout', { credentials: 'include', method: 'delete' })
-            .then(function () {
-                document.querySelector("#title").innerHTML = 'Du loggede af...';
-                setTimeout(function () { location.href = "/"; }, 1000);
-            });
+        
     }
 
     // Interval-functtion der holder øje med om session-cookien stadig eksisterer
