@@ -83,10 +83,10 @@
                                             <input name="catpos" type="number" value="${d.position}">
                                         </div>
                                         <div class="cat-cell">
-                                            <img data-cmd="catEdit" data-id="frm${d.id}" class="iconImage clickable" src="img/plus-2x.png" title="Opdater">
+                                            <img data-cmd="catEdit" data-id="frm${d.id}" class="iconImage clickable" src="img/Refresh.png" title="Opdater">
                                         </div>
                                         <div class="cat-cell">
-                                            <img data-cmd="catDelete" data-id="frm${d.id}" class="iconImage clickable" src="img/minus-2x.png" title="Slet">
+                                            <img data-cmd="catDelete" data-id="frm${d.id}" class="iconImage clickable" src="img/Trash.png" title="Slet">
                                         </div>
                                     </div>
                                 </form>`;
