@@ -87,7 +87,7 @@ exports.verifySession = function(res, cookie, callback){
     });
 };
 
-exports.update = function(res, sql, values, callback){
+exports.query = function(res, sql, values, callback){
     connection.query(sql, values, function(err, data){
         if(err){
             helpers.respond(res, {besked: "Database ikke tilgængelig."}, 503);
