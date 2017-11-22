@@ -150,7 +150,6 @@ input[readonly]{
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 .iconImage {
     width: 12px;
-    background: rgba(11, 231, 220, 0.904);
 }
 .clickable{
     cursor: pointer;
