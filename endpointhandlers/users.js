@@ -50,6 +50,7 @@ module.exports = {
                 helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
                 return;
             }
+            // Jeg vil ikke tillade at 'admin' brugeren slettes. Jeg forudsætter at 'admin' har id = 1
             var sql = "delete from users where id = ? and id != 1";
             var values = [formData.id];
             database.query(res, sql, values, function(data){
