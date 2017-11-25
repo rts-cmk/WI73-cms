@@ -753,16 +753,16 @@ exports.getCookies = function(req){
             var name = decodeURI(cp.split('=')[0].trim());
             var value = decodeURI(cp.split('=')[1].trim());
             cookies[name] = value;
-        })
+        });
     }
     return cookies;
-}
+};
 
 
 exports.redirect = function(res, url){
     res.writeHead(302, {'location': url});
     res.end();
-}
+};
 
 exports.getFormData = function(req, res, callback){
     var form = new multiparty.Form();
@@ -775,17 +775,6 @@ exports.getFormData = function(req, res, callback){
         callback(fields, files);
     });
 };
-
-    var userData = '';
-    var formData;
-    req.on('data', function(d){
-        userData += d;
-    });
-    req.on('end', function(){
-        formData = qs.parse(userData);
-        callback(formData);
-    });
-}
 ```
 Mens man udvikler er det en god hjælp, at alle indkommende requests udskrives på server terminalen. Derfor har jeg tilføjet et modul, `logger`, i filem `logger.js`. Modulet udskriver forskellige informationer til konsollen. Det er muligt at styre hvilke informationer der logges ved hjælp af parameteren `level` der defaulter til 3
 
@@ -807,5 +796,20 @@ module.exports = function(req, level = 3){
     console.log(logTxt);
 }
 ```
+Logger.js skal så importeres i `router.js`. Logger funktionen kan så kaldes som det første funktionskald i `router.js`.
+
+Eksempel uddrag fra `router.js`
+```
+// Importer logger
+const logger = require('./logger');
+
+// Denne funktion er arbejdshesten. Den kaldes hver gang serveren modtager en request fra en client
+module.exports = function(req, res){
+    // Funktionskald til logger() i starten af router-functionen.
+    logger(req, 4);
+    // -- slut på uddrag
+
+```
+
 
 Fortsættes...
