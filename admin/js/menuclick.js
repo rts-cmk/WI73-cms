@@ -28,6 +28,7 @@
                 catDelete(caller);
                 break;
             case 'article':
+                article();
                 break
             case 'users':
                 users(caller)
@@ -46,6 +47,65 @@
         }
     }
 
+    function article(){
+        fetch('/menuitems', {method : 'get'})
+        .then(function(data){
+            return data.json();
+        })
+        .then(function(jsonData){
+            if(jsonData){
+                var dropdown = document.createElement("select");
+                dropdown.name="catId";
+                var option = document.createElement("option");
+                option.value = 0;
+                option.textContent = "Vælg kategori";
+                dropdown.appendChild(option);
+                jsonData.forEach(function(jd){
+                    option = document.createElement("option");
+                    option.value = jd.id;
+                    option.textContent = jd.name;
+                    dropdown.appendChild(option);
+                });
+                var form = document.createElement("form")
+                form.id = "frmArticle";
+
+                var title = document.createElement("input")
+                title.width = 50;
+                title.type = "text";
+                title.name = "title";
+                title.placeholder = "Artikel overskrift";
+
+                var textarea = document.createElement("textarea")
+                textarea.name = "article";
+
+
+                form.appendChild(title);
+                form.appendChild(textarea);
+                form.appendChild(dropdown);
+
+                var btn = document.createElement('button')
+                btn.type = "button";
+                btn.dataset.cmd = "articleAdd"
+                btn.dataset.frm = "frmArticle";
+                btn.innerHTML = "Upload";
+
+                form.appendChild(btn);
+
+                var container = document.createElement("div");
+                container.className = "tbl-container";
+                container.appendChild(form);
+
+                var content = document.querySelector('#content');
+                content.innerHTML = '';
+                content.appendChild(container);
+            }
+        })
+        .catch(function(err){
+            console.log(err);
+        })
+    }
+    
+    
     function users(){
         fetch('/users', {credentials : 'include', method : 'get'})
         .then(function(data){
