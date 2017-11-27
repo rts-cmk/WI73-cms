@@ -11,5 +11,19 @@ module.exports = {
         database.articleselect(res, sql, [params.catid], function(data){
             helpers.respond(res, data);
         });
-    } 
+    },
+    
+    'POST' : function(req, res){
+        helpers.getFormData(req, res, function(formData){
+            if(helpers.objEmpty(formData)){
+                helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
+                return;
+            }
+            var sql = 'insert into articles (category_id, title, content) values(?, ?, ?)';
+            var values = [formData.catId, formData.title, formData.article];
+            database.query(res, sql, values, function(data){
+                helpers.respond(res, data);
+            });
+        });
+    }
 };
