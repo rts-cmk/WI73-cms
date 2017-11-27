@@ -105,6 +105,18 @@
         })
     }
     
+     function articleAdd(caller){
+        var frmId = caller.dataset.frm;
+        var frm = document.querySelector(`#${frmId}`);
+        var frmData = new FormData(frm);
+        fetch('/article',{credentials:'include', method: 'post', body: frmData})
+        .then(function(data){
+            document.querySelector('div[data-cmd="article"]').click();
+        })
+        .catch(function(err){
+            console.log(err);
+        })
+    }
     
     function users(){
         fetch('/users', {credentials : 'include', method : 'get'})
