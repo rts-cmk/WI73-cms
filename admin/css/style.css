@@ -87,7 +87,7 @@ section#content{
     color: white;
 }
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-.cat-container{
+.tbl-container{
     /* max-width: 50%; */
     /* min-width: 30%; */
     min-height: 50px;
@@ -98,14 +98,14 @@ section#content{
     border: thin solid #666;
     background: #f1f1f1;
 }
-.cat-head {
+.tbl-head {
     display: table-caption;
 }
-.cat-row{
+.tbl-row{
     display: table-row;
     padding: 1px;
 }
-.cat-cell{
+.tbl-cell{
     display: table-cell;
     padding: 0 2px 0 2px
 }
