@@ -30,6 +30,9 @@
             case 'article':
                 article();
                 break
+            case 'articleAdd' : // OK
+                articleAdd(caller);
+                break;    
             case 'users':
                 users(caller)
                 break;
