@@ -26,6 +26,9 @@
 </head>
 <body>
     <main>
+        <!-- Da jeg bruger modulet 'multiparty' til at tage imod de afsendte form-data
+             er det vigtigt at formens enctype er "multipart/form-data", ellers virker
+             det ikke. -->
         <form id="loginform" method="post" action="/login" enctype="multipart/form-data">
                 <h4>Login påkrævet</h4>
                 
