@@ -37,6 +37,9 @@
             case 'articleAdd' : // OK
                 articleAdd(caller);
                 break;
+            case 'articleDelete' :
+                articleDelete();
+                break;
             case 'users':   // OK
                 users(caller);
                 break;
@@ -54,6 +57,16 @@
         }
     }
 
+    function articleDelete(caller){
+        // alert('Delete ' + caller.dataset.formid);
+        var form = document.querySelector(`#${caller.dataset.id}`);
+        var formdata = new FormData(form);
+        fetch('/article',{method : 'delete', credentials : 'include', body : formdata})
+        .then(function(data){
+            document.querySelector('div[data-cmd="edit"]').click();
+        });
+    }
+    
     // Sender ny artikel til serveren
     function articleAdd(caller){
         var frmId = caller.dataset.frm;
@@ -103,7 +116,7 @@
             }
         });
     }
-
+    
     function articleOverview(caller){
         fetch('/article?catid='+caller.value, {method:'get'})
         .then(function(data){
@@ -112,8 +125,6 @@
         .then(function(jsonData){
             if(jsonData && jsonData.length > 0){
                 // opret container
-
-
                 var editContainer = document.querySelector("#editContainer");
                 while(editContainer.childNodes.length > 1) {
                      editContainer.removeChild(editContainer.lastChild);
@@ -139,6 +150,12 @@
                     input.value = jd.title;
                             
                     cell.appendChild(input);    // append input til cell
+
+                    input = document.createElement('input');
+                    input.type = "hidden";
+                    input.value = jd.id;
+                    input.name = "id";
+                    cell.appendChild(input);    //
                     row.appendChild(cell);   // append cell til row
 
                     cell = document.createElement('div');   // opret cell til img-edit
@@ -159,7 +176,8 @@
                     var img = document.createElement('img');    // opret img
                     img.classList = "iconImage clickable";
                     img.src = "img/Trash.png";
-                    img.dataset.cmd = "articleDelete"
+                    img.dataset.cmd = "articleDelete";
+                    img.dataset.id = `frm${jd.id}`
 
                     cell.appendChild(img);  // append img til cell
 
