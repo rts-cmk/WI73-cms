@@ -89,7 +89,7 @@ section#content{
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 .tbl-container{
     /* max-width: 50%; */
-    /* min-width: 30%; */
+    min-width: 30%;
     min-height: 50px;
     display: table;
     margin: auto;
@@ -109,37 +109,57 @@ section#content{
     display: table-cell;
     padding: 0 2px 0 2px
 }
+
+input{
+    width: 100%;
+}
+
+select {
+    margin: 10px 0;
+    width: 52%;
+}
+
+textarea {
+    margin-top: 14px;
+    width: 100%;
+    height: 200px;
+}
+button {
+    width: 52%;
+}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 input:focus{
     background: yellow;
 }
 input[readonly]{
     border: none;
-    text-align: center;
     background: #f1f1f1;
 }
+.center {
+    text-align: center;
+}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-.userTbl{
+/* .userTbl{
     width: 50%;
     margin: 50px auto;
     border: thin solid #666;
     background: #f1f1f1;
-}
+} */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-.userTbl tr:nth-child(even){
+/* .userTbl tr:nth-child(even){
     background: #ccc;
-}
+} */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-.articlesTbl{
+/* .articlesTbl{
     width: 80%;
     margin: 50px auto;
     border: thin solid #666;
     background: #f1f1f1;
-}
+} */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-.articlesTbl tr:nth-child(even){
+/* .articlesTbl tr:nth-child(even){
     background: #ccc;
-}
+} */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 .frmBox{
     width: 300px;
@@ -150,6 +170,7 @@ input[readonly]{
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 .iconImage {
     width: 12px;
+    /* background: rgba(11, 231, 220, 0.904); */
 }
 .clickable{
     cursor: pointer;
