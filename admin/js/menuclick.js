@@ -38,7 +38,7 @@
                 articleAdd(caller);
                 break;
             case 'articleDelete' :
-                articleDelete();
+                articleDelete(caller);
                 break;
             case 'users':   // OK
                 users(caller);
