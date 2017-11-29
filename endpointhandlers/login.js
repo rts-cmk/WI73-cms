@@ -12,7 +12,8 @@ module.exports = {
             // Hvis vi er her er brugeren allerede logget ind
             // Sætter expiretime til now() + 900000 ms svarende til 15 min ude i fremtiden
             var expiretime = new Date(new Date().getTime() + 900000).toUTCString();  // 900000 ms = 15 min
-            res.setHeader('Set-cookie', [`id=${cookie.id}; expires=${expiretime}`]);
+            // res.setHeader('Set-cookie', [`id=${cookie.id}; expires=${expiretime}`]);
+            res.setHeader('Set-cookie', [`id=${cookie.id}`]);            
             helpers.redirect(res, 'admin/index.html');
             // helpers.fileRespond(res, 'admin/index.html');
         })
@@ -36,7 +37,8 @@ module.exports = {
                     }
                     // Sætter expiretime til now() + 900000 ms svarende til 15 min ude i fremtiden
                     var expiretime = new Date(new Date().getTime() + 900000).toUTCString();  
-                    res.setHeader('Set-cookie', [`id=${dbsess}; expires=${expiretime}`]);
+                    // res.setHeader('Set-cookie', [`id=${dbsess}; expires=${expiretime}`]);
+                    res.setHeader('Set-cookie', [`id=${dbsess}`]);                    
                     // helpers.fileRespond(res, 'admin/index.html');
                     helpers.redirect(res, '/admin/index.html');
                 })
