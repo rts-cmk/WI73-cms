@@ -25,5 +25,20 @@ module.exports = {
                 helpers.respond(res, data);
             });
         });
+    },
+    
+    'DELETE' : function(req, res){
+        helpers.getFormData(req, res, function(formData){
+            console.log(formData); 
+            if(helpers.objEmpty(formData)){
+                helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
+                return;
+            }
+            var sql = 'delete from articles where id = ?';
+            var values = [formData.id];
+            database.query(res, sql, values, function(data){
+                helpers.respond(res, data);
+            });
+        });
     }
 };
