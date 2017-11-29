@@ -96,6 +96,7 @@
                 container.id = "editContainer"                  // Set id på container
                 container.className = "tbl-container";          // set className på container
                 container.appendChild(dropdown);
+                var content = document.querySelector("#content")
                 content.innerHTML = '';                         // Tøm #content
                 content.appendChild(container);                 // append container til #content
                 
