@@ -46,6 +46,9 @@
             case 'articleEdit' :
                 articleEdit(caller);
                 break;
+            case 'articleUpdate' :
+                articleUpdate(caller);
+                break;
             case 'users':   // OK
                 users(caller);
                 break;
@@ -59,8 +62,30 @@
                 userEdit(caller);
                 break;
             default:
-                alert(caller.dataset.cmd);
+                alert(`Ikke implementeret endu: ${caller.dataset.cmd}`);
         }
+    }
+
+    function articleUpdate(caller){
+        var frmId = caller.dataset.frm;
+        var frm = document.querySelector(`#${frmId}`);
+        var frmData = new FormData(frm);
+        if(frmData.get('title').length < 1){
+            alert('Artiklen må ikke være uden overskrift');
+            return;
+        }
+        if(frmData.get('article').length < 1){
+            alert('Artiklen må ikke være tom.');
+            return;
+        }
+        if(frmData.get('catId') == 0){
+            alert('Kategori skal være valgt');
+            return;
+        }
+        fetch('/article', {credentials : 'include', method : 'put', body : frmData})
+        .then(function(data){
+            document.querySelector('div[data-cmd="edit"]').click();
+        })
     }
 
     function articleDelete(caller){
@@ -101,9 +126,7 @@
     }
 
     function articleEdit(caller){
-        // alert(caller.dataset.artid);
         article(caller.dataset.artid);
-        // return;
     }
 
     // Dropdownbox med artikelkategorier
@@ -118,9 +141,6 @@
                 dropdown.id = 'ddArtId';
                 dropdown.name = "catId";
                 dropdown.addEventListener('change',articleOverview, true);
-                // dropdown.onchange = function(){
-                //     articleOverview(this)
-                // };
                 var option = document.createElement("option");
                 option.value = 0;
                 option.textContent = "Vælg kategori";
@@ -155,7 +175,8 @@
                 // opret container
                 var editContainer = document.querySelector("#editContainer");
                 while(editContainer.childNodes.length > 1) {
-                     editContainer.removeChild(editContainer.lastChild);
+                    editContainer.lastChild.removeEventListener('click')
+                    editContainer.removeChild(editContainer.lastChild);
                 }
                 var hr = document.createElement('hr')
                 hr.style.margin = '10px';
@@ -267,6 +288,11 @@
                 var btn = document.createElement('button');
                 btn.type = "button";
                 if(artId){
+                    var articleId = document.createElement('input');
+                    articleId.type = 'hidden';
+                    articleId.value = artId;
+                    articleId.name = 'artid';
+                    form.appendChild(articleId);
                     btn.dataset.cmd = "articleUpdate"
                     btn.dataset.artid = artId
                     btn.innerHTML = "Update";
