@@ -1,16 +1,19 @@
-
 (function () {
-    document.addEventListener("click", menuclick, true);
+    
+    document.addEventListener("click", menuclick, true);    // Først en eventlistener der 'fanger' alle museklik på siden
 
     function menuclick(e) {
+        // Vi skal kun håndtere musklik der sker på elementer der har en 'data-cmd' attribut
+        // denne attribut bruges også til at angive hvilken kommando der skal udføres.
         var caller = e.target;
         if (!caller.dataset.cmd) {
             return;
         }
         if (document.querySelector('.itemActive')) {
-            document.querySelector('.itemActive').classList.toggle('itemActive');
+            // henter det element der har class = "itemActive"
+            document.querySelector('.itemActive').classList.toggle('itemActive');   // toggler klassen 'itemactive' 
         }
-        caller.classList.toggle('itemActive');
+        caller.classList.toggle('itemActive');  // Toggler 'itemeActive' på 'caller' elementet
 
         switch (caller.dataset.cmd) {
             case 'logout': // OK
@@ -28,17 +31,20 @@
             case 'catDelete' :   // OK
                 catDelete(caller)
                 break;
-            case 'article' :
+            case 'article' :    // OK
                 article(caller);
                 break
-            case 'edit' : 
+            case 'edit' :   // OK
                 edit();
                 break;
             case 'articleAdd' : // OK
                 articleAdd(caller);
                 break;
-            case 'articleDelete' :
+            case 'articleDelete' :  // OK
                 articleDelete(caller);
+                break;
+            case 'articleEdit' :
+                articleEdit(caller);
                 break;
             case 'users':   // OK
                 users(caller);
@@ -58,7 +64,8 @@
     }
 
     function articleDelete(caller){
-        // alert('Delete ' + caller.dataset.formid);
+        var dd;
+        var ddVal = document.querySelector('#ddArtId').value;
         var form = document.querySelector(`#${caller.dataset.id}`);
         var formdata = new FormData(form);
         fetch('/article',{method : 'delete', credentials : 'include', body : formdata})
@@ -72,6 +79,18 @@
         var frmId = caller.dataset.frm;
         var frm = document.querySelector(`#${frmId}`);
         var frmData = new FormData(frm);
+        if(frmData.get('title').length < 1){
+            alert('Du skal skrive en overskrift');
+            return;
+        }
+        if(frmData.get('article').length < 1){
+            alert('Du har glemt at skrive artiklen.');
+            return;
+        }
+        if(frmData.get('catId') == 0){
+            alert('Husk at vælge kategori');
+            return;
+        }
         fetch('/article',{credentials:'include', method: 'post', body: frmData})
         .then(function(data){
             document.querySelector('div[data-cmd="article"]').click();
@@ -79,6 +98,12 @@
         .catch(function(err){
             console.log(err);
         })
+    }
+
+    function articleEdit(caller){
+        // alert(caller.dataset.artid);
+        article(caller.dataset.artid);
+        // return;
     }
 
     // Dropdownbox med artikelkategorier
@@ -90,10 +115,12 @@
         .then(function(jsonData){
             if(jsonData){
                 var dropdown = document.createElement("select");
-                dropdown.name="catId";
-                dropdown.onchange = function(){
-                    articleOverview(this)
-                };
+                dropdown.id = 'ddArtId';
+                dropdown.name = "catId";
+                dropdown.addEventListener('change',articleOverview, true);
+                // dropdown.onchange = function(){
+                //     articleOverview(this)
+                // };
                 var option = document.createElement("option");
                 option.value = 0;
                 option.textContent = "Vælg kategori";
@@ -117,7 +144,8 @@
         });
     }
     
-    function articleOverview(caller){
+    function articleOverview(e){
+        var caller = e.target;
         fetch('/article?catid='+caller.value, {method:'get'})
         .then(function(data){
             return data.json();
@@ -164,8 +192,9 @@
                     
                     var img = document.createElement('img'); // opret img til 'rediger-knap'
                     img.classList = "iconImage clickable";
-                    img.src = "img/Refresh.png";
+                    img.src = "img/Pencil.png";
                     img.dataset.cmd = "articleEdit"
+                    img.dataset.artid = `${jd.id}`
 
                     cell.appendChild(img);  // append img til cell
                     row.appendChild(cell);   // append cell til row
@@ -198,7 +227,8 @@
     }
 
     // Formular med textarea til ny artikel
-    function article(){
+    function article(artId){
+        artId = parseInt(artId) || null;
         fetch('/menuitems', {method : 'get'})
         .then(function(data){
             return data.json();
@@ -206,6 +236,7 @@
         .then(function(jsonData){
             if(jsonData){
                 var dropdown = document.createElement("select");
+                dropdown.id = "dd_Art"
                 dropdown.name="catId";
                 var option = document.createElement("option");
                 option.value = 0;
@@ -221,20 +252,30 @@
                 form.id = "frmArticle";
 
                 var title = document.createElement("input")
-                title.width = 50;
+                // title.width = 50;
+                title.id = "headline";
                 title.type = "text";
                 title.name = "title";
                 title.placeholder = "Artikel overskrift";
                 var textarea = document.createElement("textarea")
+                textarea.id = 'artText';
                 textarea.name = "article";
                 form.appendChild(title);
                 form.appendChild(textarea);
                 form.appendChild(dropdown);
-                var btn = document.createElement('button')
+
+                var btn = document.createElement('button');
                 btn.type = "button";
-                btn.dataset.cmd = "articleAdd"
+                if(artId){
+                    btn.dataset.cmd = "articleUpdate"
+                    btn.dataset.artid = artId
+                    btn.innerHTML = "Update";
+                }
+                else{
+                    btn.dataset.cmd = "articleAdd";
+                    btn.innerHTML = "Upload";
+                }
                 btn.dataset.frm = "frmArticle";
-                btn.innerHTML = "Upload";
                 form.appendChild(btn);
                 var container = document.createElement("div");
                 container.className = "tbl-container";
@@ -243,6 +284,25 @@
                 content.innerHTML = '';
                 content.appendChild(container);
             }
+        })
+        .then(function(){
+            if(artId){
+                fetch(`/article?artid=${artId}`, {method : 'get'})
+                .then(function(data){
+                    return data.json();
+                })
+                .then(function(jsonData){
+                    var dd = document.querySelector('#dd_Art');
+                    dd.value = jsonData[0].category_id;
+                    var headline = document.querySelector('#headline');
+                    headline.value = jsonData[0].title
+                    var txt = document.querySelector('#artText')
+                    txt.textContent = jsonData[0].content;
+                })
+                .catch(function(err){
+                    console.log(err);
+                })
+            }            
         })
         .catch(function(err){
             console.log(err);
@@ -311,6 +371,16 @@
     function userAdd(caller){
         var form = document.querySelector('#frmUserAdd');
         var formData = new FormData(form);
+        if(formData.get("username").trim().length < 1){
+            alert("Brugernavn angives");
+            document.getElementsByName('username')[document.getElementsByName('username').length - 1].focus()            
+            return;
+        }
+        if(formData.get("password").trim().length < 1){
+            alert("Adgangskode skal angives");
+            document.getElementsByName('password')[document.getElementsByName('password').length - 1].focus()
+            return;
+        }
         fetch('/users', {
             credentials: 'include',
             method: 'post',
@@ -437,12 +507,22 @@
         .then(function (data) {
             document.querySelector('div[data-cmd="categories"]').click();
         });
+
+        // });
     }
 
     function catEdit(caller) {
         var formId = caller.dataset.id
         var frm = document.querySelector(`#${formId}`);
         var frmData = new FormData(frm);
+        if(frmData.get('catname').trim().length < 1){
+            alert('Kategorinavnet skal angives');
+            return;
+        }
+        if(frmData.get('catpos').trim().length < 1){
+            alert('Positionen skal angives');
+            return;
+        }
         fetch('/menuitems', {
             credentials: 'include',
             method: 'put',
@@ -450,7 +530,6 @@
         })
             .then(function (data) {
                 document.querySelector('div[data-cmd="categories"]').click();
-                // return data.json();
             })
     }
 
