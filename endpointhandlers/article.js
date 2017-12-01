@@ -5,12 +5,24 @@ const qs = require('querystring');
 
 module.exports = {
     'GET' : function(req, res){
+        var cond, values;
         var query = url.parse(req.url).query
         var params = qs.parse(query);
-        var sql = 'select * from articles where category_id = ?';
-        database.articleselect(res, sql, [params.catid], function(data){
+        // console.log(params);
+        // Hvis params.catid, så hent artikler med cat_id
+        // Hvis params.artid, så hent artiklen med artid
+        if(params.catid){
+            cond = 'category_id';
+            values = [params.catid];
+        }
+        if(params.artid){
+            cond = 'id';
+            values = [params.artid];
+        }
+        var sql = `select * from articles where ${cond} = ?`;
+        database.articleselect(res, sql, values, function(data){
             helpers.respond(res, data);
-        });
+        });        
     },
     
     'POST' : function(req, res){
