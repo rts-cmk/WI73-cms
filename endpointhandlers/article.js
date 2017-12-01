@@ -39,6 +39,20 @@ module.exports = {
         });
     },
     
+    'PUT' : function(req, res){
+        helpers.getFormData(req, res, function(formData){
+            if(helpers.objEmpty(formData)){
+                helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
+                return;
+            }
+            var sql = 'update articles set category_id = ?, title = ?, content = ? where id = ?';
+            var values = [formData.catId, formData.title, formData.article, formData.artid];
+            database.query(res, sql, values, function(data){
+                helpers.respond(res, data);
+            });
+        });
+    },    
+    
     'DELETE' : function(req, res){
         helpers.getFormData(req, res, function(formData){
             console.log(formData); 
