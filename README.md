@@ -205,9 +205,12 @@ module.exports = function(req, res){
     if(handler){
         var action = handler[req.method];
         if(action){
+            // Hvis vi er her er der fundet både en matchende route og metode.
             action(res);
             return;
         }
+        
+        // Hvis vi er her er der fundet en route, men der er ikke fundet en metode der er understøttet.
         helpers.respond(res, `Status: 404. Metode '${req.method}' ikke understøttet.`, 404);
         return;
     }
@@ -223,13 +226,13 @@ Vi har nu et simpelt API der er i stand til at svare på både `GET` og `POST` r
 
 Vores API kan ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre. 
 
-Vi skal tilføje en hjælpefunktion til vores `helpers.js`. Funktionen skal kunne læse en fil fra filsystemet og sende indholdet i filen til en browser ved hjælp af `response` objektet. Derfor får vi brug for filsystem-modulet `fs`. 
+Vi skal tilføje en hjælpefunktion til vores `helpers.js`. Funktionen skal kunne læse en fil fra filsystemet og sende indholdet i filen til en browser. Derfor får vi brug for filsystem-modulet `fs`. Modulet er en del af Node installationen og skal ikke installeres.
 
-Vi får også brug for at kunne detektere hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.
+Vi får også brug for at kunne bestemme hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.
 
-Vi opretter et json-objekt i `helpers` filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filer vi ønsker at håndtere, og værdierne svarer til mimetyperne.
+Vi opretter et objekt i `helpers.js` filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filertyper vi ønsker at kunne håndtere, og værdierne svarer til mimetyperne.
 
-Koden for mimetype-objektet.
+Koden der skal tilføjes til `helpers.js`.
 ```javascript
 const fs = require('fs');  // Importer filsystem-modulet
 const path = require('path');
@@ -244,11 +247,9 @@ const mimetypes = {
 
 ```
 
-Vi får også brug for en funktion der kan læse filer fra serverens filsystem. Derfor får vi brug for at importere filsystem modulet `fs` der også er en del af node installationen.
+Vi får også brug for en funktion der kan læse filer fra serverens filsystem. 
 
-Det gør vi i starten af filen `helpers.js` med denne linje `var fs = require('fs');` 
-
-Koden til funktionen der skal læse en fil fra filsystemet sende den til browseren placeres også i `helpers.js` 
+Koden til denne funktionen der læser fra filsystemet sender til browseren placeres også i `helpers.js` 
 
 Her er koden
 ```javascript
