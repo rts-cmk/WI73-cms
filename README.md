@@ -14,7 +14,7 @@
 
 ### Indledningsvis vil vi starte med at demonstrere et simpelt API
 
-#### Et meget simpelt API der viser hvordan routes kan opbygges i node.js (næsten) uden brug af 3. parts moduler.
+#### Et meget simpelt API der viser hvordan routes kan opbygges i node.js.
 
 Dvs. dette eksempel benytter sig udelukkende af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at _nodemon_ modulet installeres. 
 
@@ -83,7 +83,7 @@ Kigger vi på vores endpointhandlere ser vi, at de to funktioner ligner hinanden
 
 Derfor vil jeg ændre koden lidt. Først opretter jeg en ny mappe, `endpointhandlers`. I denne mappe vil jeg oprette to filer, `cat.js` og `dog.js`.
 
-I det to filer placeres funktionerne for henholdsvis `/cat` og `/dog` routene.
+I de to filer placeres funktionerne for henholdsvis `/cat` og `/dog` routene.
 
 endpointhandlers/cat.js
 ```javascript
@@ -103,7 +103,7 @@ module.exports = function(res) {
 ```
 
 Vi har nu fået adskilt selve endpointhandlerne fra `routes.js`, men stadig har vi to handlere der har en del til fælles.
-Næste skridt vil være at oprette endnu en fil som jeg vil kalde `helpers.js`. Denne fil er tænkt til at indeholde hjælpefunktioner. I dette eksempel vil der dog kun være en enkelt hjælpefunktion, eller rettere sagt metode, nemlig `.respond()`. Tanken er at denne metode skal indeholde den kode der er fælles for endpointhandlerne. Koden for `respond()` metoden skal se sådan ud:
+Næste skridt vil være at oprette endnu en fil som jeg vil kalde `helpers.js`. Denne fil er tænkt til at indeholde hjælpefunktioner. I dette eksempel vil der til at starte med kun være en enkelt hjælpefunktion, eller rettere sagt metode, nemlig `respond()`. Tanken er at denne metode skal indeholde den kode der er fælles for endpointhandlerne. Koden for `respond()` metoden skal se sådan ud:
 
 
 helpers.js
@@ -182,7 +182,7 @@ module.exports = {
 };
 ```
 
-Men for at få den ændrede kode til at virke, er det nødvendigt at ændre i `router` modulet.
+Men for at få den ændrede kode til at virke, er det også nødvendigt at ændre i `router` modulet.
 
 Koden i dette modul ændres så den ser sådan ud:
 
