@@ -127,7 +127,6 @@ function articleOverview(e){
             // opret container
             var editContainer = document.querySelector("#editContainer");
             while(editContainer.childNodes.length > 1) {
-                editContainer.lastChild.removeEventListener('click')
                 editContainer.removeChild(editContainer.lastChild);
             }
             var hr = document.createElement('hr')
