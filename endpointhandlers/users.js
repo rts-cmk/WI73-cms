@@ -2,38 +2,57 @@ const helpers = require('./../helpers');
 const database = require('./../data/database');
 
 module.exports = {
-    // Henter alle brugere fra databasen og sender dem til browseren
+    // Henter alle brugere fra databasen og sender dem til browseren, men kun hvis brugeren er logget ind
     'GET': function (req, res) {
-        var sql = "SELECT id, username FROM users ORDER BY username";
-        var values = [1];
-        database.query(res, sql, values, function (data) {
-            if(helpers.objEmpty(data)){
-                helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
-                return;
+        var cookie = helpers.getCookies(req);
+        database.verifySession(res,cookie,function(veriFyData){
+            if(helpers.objEmpty(veriFyData)){
+                // Hvis vi er her er brugeren logget ikke ind....
+                helpers.redirect(res,'/login'); // ...derfor skal der sendes en rediect tilbage til browseren...
+                return; // ...og afsluttes med en return
             }
-            helpers.respond(res, data);
+            // Hvis vi er her er brugeren logget ind, og vi kan fortsætte
+            var sql = "SELECT id, username FROM users ORDER BY username";
+            var values = [1];
+            database.query(res, sql, values, function (data) {
+                if(helpers.objEmpty(data)){
+                    helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
+                    return;
+                }
+                helpers.respond(res, data);
+            });
         });
     },
 
-   'POST' : function(req, res){
-        helpers.getFormData(req, res, function(formData){
-            if(helpers.objEmpty(formData)){
-                helpers.respond(res, {besked : "Der opstod en fejl"}, 500)
-                return;
+    'POST' : function(req, res){
+        var cookie = helpers.getCookies(req);
+        database.verifySession(res,cookie,function(veriFyData){
+            if(helpers.objEmpty(veriFyData)){
+                // Hvis vi er her er brugeren logget ikke ind....
+                helpers.redirect(res,'/login'); // ...derfor skal der sendes en rediect tilbage til browseren...
+                return; // ...og afsluttes med en return
             }
-            if(formData.username[0].toString().length == 0 || formData.password[0].toString().length == 0){
-                helpers.respond(res,{besked: 'Brugernavn og adgangskode skal begge være udfyldt'}, 500);
-                return;
-            }
-            var sql = "insert into users (username, password) values(?, ?)"
-            var values = [formData.username, formData.password];
-            database.query(res, sql, values, function(data){
-                helpers.respond(res, data);
-            })
+            helpers.getFormData(req, res, function(formData){
+                if(helpers.objEmpty(formData)){
+                    helpers.respond(res, {besked : "Der opstod en fejl"}, 500)
+                    return;
+                }
+                if(formData.username[0].toString().length == 0 || formData.password[0].toString().length == 0){
+                    helpers.respond(res,{besked: 'Brugernavn og adgangskode skal begge være udfyldt'}, 500);
+                    return;
+                }
+                var sql = "insert into users (username, password) values(?, ?)"
+                var values = [formData.username, formData.password];
+                database.query(res, sql, values, function(data){
+                    helpers.respond(res, data);
+                })
+            });
         });
     },
 
     'PUT' : function(req, res){
+        // var cookie = helpers.getCookies(req);
+        // database.verifySession(res, cookie, )
         helpers.getFormData(req, res, function(formData){
             if(helpers.objEmpty(formData)){
                 helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
@@ -90,9 +109,16 @@ module.exports = {
     'DELETE' : function(req, res){
         helpers.getFormData(req, res, function(formData){
             if(helpers.objEmpty(formData)){
-                helpers.respond(res, {besked : "Der opstod en fejl"}, 500);
+                // Vi eer her hvis vi ikke har nogle formData
+                helpers.respond(res, {besked : "Der opstod en fejl"}, 400);
                 return;
             }
+            if(formData.id[0].toString().length == 0){
+                // Hvis formData.id er tom er vi her
+                helpers.respond(res, {besked : "Der opstod en fejl"}, 400);
+                return;
+            }
+            // Vi er her hvis vi har de nødvendige data til rådighed til at gennemføre operationen
             // Jeg vil ikke tillade at 'admin' brugeren slettes. Jeg forudsætter at 'admin' har id = 1
             var sql = "delete from users where id = ? and id != 1";
             var values = [formData.id];
