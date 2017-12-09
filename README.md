@@ -666,7 +666,7 @@ I eksemplet sætter vi en HTTP header med to cookies, `cookie1` og `cookie2` med
 
 Hvis vi ønsker at sætte en `expire` timestamp for en cookie, kan vi gøre det således:
 ```javascript
-response.setHeader('Set-Cookie', ['id=1234'; expire=2017-12-24T23:59:59.000Z]);
+response.setHeader('Set-Cookie', ['id=1234; expire=2017-12-24T23:59:59.000Z']);
 ```
 
 Denne cookie, der har navnet 'id' og værdien '1234', vil udløbe juleaften et sekund før midnat. 
