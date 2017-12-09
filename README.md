@@ -704,7 +704,7 @@ Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data d
 
 ~~Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.~~~
 
-Efter en del overvejelser har jeg besluttet at bruge et tredieparts modul til at læse indkommende formdata. Blandt de mange muligheder der findes, har jeg valgt at bruge modulet `multiparty`. Dette modul har en simpel API, er namt at bruge og har kun en enkelt dependency. Det betyder at når man installerer dette modul vil det kun være enkelt modul der yderligere bliver installeret. Jo færre dependencies, jo bedre. I denne sammenhæng skal man huske at importere `multiparty` modulet i `helpers.js` filen med `require()` funktionen
+Efter en del overvejelser har jeg besluttet at bruge et tredieparts modul til at læse indkommende formdata. Blandt de mange muligheder der findes, har jeg valgt at bruge modulet `multiparty`. Dette modul har en simpel API, er nemt at bruge og har kun en enkelt dependency. Det betyder at når man installerer dette modul vil det kun være enkelt modul der yderligere bliver installeret. Jeg er af den opfattelse, at jo færre dependencies, jo bedre. I denne sammenhæng skal man huske at importere `multiparty` modulet i `helpers.js` filen med `require()` funktionen
 
 
 Eksempel på anvendelse af multiparty:
