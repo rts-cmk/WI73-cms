@@ -1,5 +1,9 @@
 CREATE DATABASE  IF NOT EXISTS `demo-cms` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_danish_ci */;
 USE `demo-cms`;
+
+CREATE USER IF NOT EXISTS 'wwwuser'@'localhost' IDENTIFIED BY 'wwwuser';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `demo-cms`.* TO 'wwwuser'@'localhost';
+
 -- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
 --
 -- Host: ubu-dev    Database: demo-cms
