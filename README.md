@@ -1,7 +1,19 @@
 <a name="top"></top>
 # CMS bygget med Node.js
-### Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og udgør ikke på nogen måde et produktionsklart system.
+### Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og er på ingen måde et produktionsklart system.
 
+Hvis du har lyst til at se systemet i aktion kan du følge denne vejledning.
+Jeg forudsætter at du har Node.js og mySql installeret på din maskine.
+
+1. Download og udpak filerne i dette repositorium til en mappe efter eget valg. 
+
+2. Kør sql-scriptet `database-dump.sql` i dit yndlings databaseværktøj, fx. phpMyAdmin, mysql-workbench, sequel-pro, Valanetina-studio, etc, etc. Scriptet opretter databasen med de nødvendige tabeller og en database-bruger med de nødvendige rettigheder. Brugeren har brugernavnet 'wwwuser' og adgangskoden er 'wwwuser'.
+
+3. Åbn en terminal, `cd` hen til mappen med de udpakkede filer og kør kommandoen `npm install`
+
+4. Systemet kan nu startes op med kommandoen `npm start`
+
+5. Åbn en browser og gå til `http://localhost:3003` for at se public siden. Hvis du vil se administrationssiden skal du gå til `http://localhost:3003/login`. (Brugernavn/Adgangskode er admin/admin)
 
 ## Indhold.
 * [1. del - simpelt API](#simpleAPI)
