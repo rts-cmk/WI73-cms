@@ -262,7 +262,7 @@ const mimetypes = {
 
 Vi får også brug for en funktion der kan læse filer fra serverens filsystem. 
 
-Koden til denne funktionen der læser fra filsystemet sender til browseren placeres også i `helpers.js` 
+Koden til denne funktionen der læser fra filsystemet og sender til browseren placeres også i `helpers.js` 
 
 Her er koden
 ```javascript
