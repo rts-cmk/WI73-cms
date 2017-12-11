@@ -1,6 +1,7 @@
 <a name="top"></top>
 # CMS bygget med Node.js
-### Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og udgør ikke et produktionsklart system.
+### Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og udgør ikke på nogen måde et produktionsklart system.
+
 
 ## Indhold.
 * [1. del - simpelt API](#simpleAPI)
