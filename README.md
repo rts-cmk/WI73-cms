@@ -19,12 +19,7 @@
     * [4.2-statiske filer](#4.2-staticfiles)
 * [5.0 Frontend](#5.0-frontend)
 
----
-* [1. del - simpelt API](#simpleAPI)
-* [2. del - statiske filer](#publicStatic)
-* [3. del - database](#database)
-* [4. del - clientside](#clientside)
-* [5. del - login](#login)
+* [6.0 Login](#6.0-login)
 
 
 <a id="1.0-indledning"></a> [top &uarr;](#top)  
@@ -971,7 +966,7 @@ Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi v
 For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.
 
 
-<a name="login"></a>[tilbage &uarr;](#top)
+<a id="6.0-login"></a>[tilbage &uarr;](#top)
 ### Login
 Vores loginsystem anvender _cookies_. Men først en lille gennemgang af hvad cookies er for en størrelse.
 
