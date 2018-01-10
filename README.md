@@ -30,7 +30,7 @@
 
 
 **Til de utålmodige.**  
-Hvis du bare har har lyst til at afprøve systemet i aktion med det samme, er der her en vejledning. Da systemet er programmeret i Node.js og bruger MySQL som datalager, er det en forudsætning at både Node.js og MySQL er installerede på din maskine. Hvis ikke, kan du downloade Node.js fra https://nodejs.org/en og MySQL fra https://dev.mysql.com/downloads/mysql. Begge de nævnte websteder har installationsvejledninger. Efter at Node.js og MySQL er installerede kan du fortsætte med 5 trins vejledningen nedenfor.  
+Hvis du bare har har lyst til at se systemet i aktion med det samme, er der her en vejledning. Da systemet er programmeret i Node.js og bruger MySQL som datalager, er det en forudsætning at både Node.js og MySQL er installerede på din maskine. Hvis ikke, kan du downloade Node.js fra https://nodejs.org/en og MySQL fra https://dev.mysql.com/downloads/mysql. Begge de nævnte websteder har installationsvejledninger. Efter at Node.js og MySQL er installerede kan du fortsætte med 5 trins vejledningen nedenfor.  
 
 1. Download og udpak filerne fra dette github repositorium til en mappe efter eget valg. 
 
