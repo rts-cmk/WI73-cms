@@ -1,0 +1,773 @@
+<p><a id="top" name="top"></top> # Simpelt CMS bygget med Node.js</p>
+<h3 id="jeg-vil-her-vise-hvordan-man-kan-opbygge-et-meget-simpelt-cms-site-programmeret-i-node.js.-lad-mig-straks-påpege-at-koden-først-og-fremmest-er-skrevet-til-undervisningsbrug-og-udgør-ikke-på-nogen-måde-et-produktionsklart-system.">Jeg vil her vise hvordan man kan opbygge et meget simpelt CMS site, programmeret i Node.js. Lad mig straks påpege, at koden først og fremmest er skrevet til undervisningsbrug, og udgør ikke på nogen måde et produktionsklart system.</h3>
+<h2 id="indhold.">Indhold.</h2>
+<ul>
+<li><a href="#1.0-indledning">1.0 Indledning</a></li>
+<li><a href="#2.0-database">2.0 Database</a></li>
+<li><a href="#3.0-api">3.0 API</a>
+<ul>
+<li><a href="#3.1-endpoints">3.1 Endpoints</a></li>
+<li><a href="#3.2-metoder">3.2 Metoder</a></li>
+<li><a href="#endpointTabel">3.3 Endpoints tabel</a></li>
+<li><a href="#3.4-request_response">3.4 Request og Response</a><br /></li>
+</ul></li>
+<li><a href="#4.0-backend">4.0 Backend</a>
+<ul>
+<li><a href="#4.1-filstruktur">4.1-filstruktur</a></li>
+<li><a href="#4.2-staticfiles">4.2-statiske filer</a></li>
+</ul></li>
+<li><a href="#5.0-frontend">5.0 Frontend</a></li>
+</ul>
+<h3 id="indledning">Indledning</h3>
+<p><strong>Til de utålmodige.</strong><br />Hvis du bare har har lyst til at afprøve systemet i aktion med det samme, er der her en vejledning. Da systemet er programmeret i Node.js og bruger MySQL som datalager, er det en forudsætning at både Node.js og MySQL er installerede på din maskine. Hvis ikke, kan du downloade Node.js fra https://nodejs.org/en og MySQL fra https://dev.mysql.com/downloads/mysql. Begge de nævnte websteder har installationsvejledninger. Efter at Node.js og MySQL er installerede kan du fortsætte med 5 trins vejledningen nedenfor.</p>
+<ol style="list-style-type: decimal">
+<li><p>Download og udpak filerne fra dette github repositorium til en mappe efter eget valg.</p></li>
+<li><p>Kør sql-scriptet <code>database-dump.sql</code> i dit yndlings databaseværktøj, fx. phpMyAdmin, mysql-workbench, sequel-pro, Valentina-studio, etc, etc. Scriptet opretter databasen med de nødvendige tabeller og en database-bruger med de nødvendige rettigheder. Det er denne bruger der anvendes af systemkoden til at oprette forbindelse til databasen. (Brugernavn 'wwwuser' og adgangskoden er 'wwwuser'.</p></li>
+<li><p>Åbn en terminal, <code>cd</code> hen til mappen med de udpakkede filer og kør kommandoen <code>npm install</code></p></li>
+<li><p>Systemet kan nu startes op med kommandoen <code>npm start</code>. Hvis systemet ikke kan starte, kan det skyldes at <code>nodemon</code> ikke er installeret. Prøv at installere <code>nodemon</code> med kommandoen <code>npm install nodemon</code></p></li>
+<li><p>Åbn en browser og gå til <code>http://localhost:3003</code> for at gå til public siden.<br />Eller <code>http://localhost:3003/login</code> for at gå til administrationssiden. (brugernavn/adgangskode er admin/admin)</p></li>
+</ol>
+<hr>
+
+<h4 id="oversigt">Oversigt</h4>
+<p>Dette simple CMS kan opdeles i to dele, frontend og backend. Frontend delen kan så igen opdeles i to dele, nemlig <em>public-</em> og <em>administrationsdelen.</em> Med publicdelen forstår jeg den del der kan tilgås af alle gennem en internetbrowser. Der kræves ikke login for at tilgå denne del. Administrationsdelen derimod, kan man kun få adgang til ved at logge ind med brugernavn og adgangskode.<br />Backend-delen kan faktisk også deles i to dele, kodedelen og databasesystemet. Selv om databasen er en del af backenden vil backend og databasen blive behandlet hver for sig i denne tekst. Overordnet set kommunikerer frontend og backend via ajax kald. Alle data der sendes fra backenden er i JSON format. Login delen bruger cookies til at verificere om en given bruger er logget ind. Ellers er backenden opbygget som et simpelt API med et antal endpoints der hver især accepterer en eller flere af http request metoderne: GET, POST, PUT og DELETE.<br />Netop fordi dette system er udviklet til undervisning, har jeg bevidst søgt en løsning der kun i begrænset omfang anvender 3. parts moduler. Ikke fordi jeg er modstander af at bruge 3. parts moduler, men min holdning er at læringsudbyttet er langt større når man selv bygger funktionaliteten op helt fra grunden. Det er årsagen til at jeg har valgt kun at bruge to tredieparts moduler, nemlig <code>mysql2</code> og <code>multiparty</code></p>
+<p><a id="2.0-database"></a> <a href="#top">top ↑</a></p>
+<h3 id="api">API</h3>
+<p>Første gang jeg hørte udtrykket API havde jeg ikke den fjerneste anelse om hvad det betød. Det var inden jeg for alvor var begyndt at beskæftige mig med softwareudviking. API kunne for min skyld lige så godt være et tilsætningsstof til vaskepulver, en ny plasttype eller måske en ny type øl. I dag er jeg så vant til at bruge begrebet, at jeg for sjov godt kunne finde på at gå ind i den nærmeste Matas butik og bede om 250 gram API. Mest for undersøge om Matas skulle ligge inde med noget API. Der er dog en risiko for at Matas ekspedienten ville svare: <code>404: Ressource ikke tilgængelig</code>.</p>
+<p>Spøg til side. API står, som bekendt, for <em>Application Programming Interface</em>. Når det handler om udvikling af websider, arbejder vi med et web API. Fx når vi indtaster <code>http://www.facebook.com</code> i browserens adressefelt sender browseren en forespørgsel til facebooks webserver. Denne forespørgsel kalder vi oftest en <em>request</em>. Requesten skal have et bestemt format for at serveren kan forstå den. Hvis facebooks server forstår requesten vil serveren sende et svar tilbage. Svaret kalder vi <em>response</em>. Hvis responsen har et format som browseren forstår, vil den fortolke responsen der så kan blive vist på den planlagte måde. Hvis vores request til serveren ikke har det rigtige format, eller vi requester en ressource der ikke findes, vil serveren svare, ligesom ekspedienten i Matas, med en statuskode der fortæller hvad der gik galt, fx. <code>404: Ressource ikke tilgængelig</code>. Det vi har med at gøre her er et web API. Dette API kan vi designe så det er skræddersyet til vores formål.</p>
+<p>Når vi designer et web API handler det primært om at definere såkaldte <em>endpoints</em> og det dataformat vi skal benytte, fx JSON eller XML eller et andet format.</p>
+<p><a id="3.1-endpoints"></a> <a href="#top">top ↑</a><br />#### Endpoints<br />Lad os kigge på en ganske almindelig URL: <code>http://www.skat.dk/skat.aspx?oid=2661</code>. Denne URL kan splittes op i forskellige dele:<br />* Protokollen: <code>http:</code>. * Domænenavn: <code>www.skat.dk</code> domænenavn. Protokol og domænenavn adskilles med <code>//</code> * Endpoint: <code>/skat.aspx</code> der her består af en skråstreg og et filnavn. * Og tilsidst querystrengen: <code>oid=2661</code> spørgsmålstegn er skilletegn mellem endpoint og parametre.</p>
+<p>I princippet kan der være et vilkårligt antal parametre. De skal blot adskilles med <code>&amp;</code> som vist i det næste eksempel: <code>http://eksempel.dk/sport/tennis?place=wi&amp;year=2017&amp;dbl=1</code>. Her udgør <code>/sport/tennis</code> vores endpoint. Efter spørgsmålstegnet kommer querystrengen, der her består af tre parametre: 1. <code>place=wi</code> 2. <code>year=2017</code> 3. <code>dbl=1</code></p>
+<p>Selv om HTTP protokollen ikke sætter nogen begrænsninger på længden af querystrengen er der i de fleste browsere begrænset hvor mange tegn man kan benytte. De fleste webservere har også en øvre grænse for hvor mange tegn de vil acceptere.</p>
+<p><a id="3.2-metoder"></a> <a href="#top">top ↑</a> #### Metoder<br />Når vi skriver javascript kode der sender HTTP requests til en server skal vi også angive hvilken HTTP metode vi skal benytte. I den forbindelse er det måske på plads lige at berøre dette begreb.<br />HTTP protokollen udgør et sæt regler for hvordan beskeder udveksles mellem sender og modtager.<br />I HTTP samenhæng er der som minimum to parter involverede, client og server. Clienten vil her være det samme som browseren. Det er altid browseren der indleder en udveksling af beskeder. Det sker ved at browseren sender en forespørgsel (request) til serveren. Serveren svarer tilbage med en respons. De data der udveksles skal overholde et ganske bestemt format der er beskrevet i HTTP protokollen.<br />HTTP beskeder er grundlæggende tekstbaserede og er opdelt i <em>header</em> og <em>body</em>.<br />Bodydelen betegnes ofte som <em>payload</em>. I headeren er der bl.a. information om payloaden. Fx hvilket tegnsæt den anvender, antal bytes i payloaden, requestens afsenderadresse, HTTP statuskode, etc, etc. Blandt de headerdata der sendes er også hvilken <em>metode</em> der skal anvendes. Der er intet magisk ved en HTTP metode. Den får ikke serveren til automatisk at handle på en bestemt måde. Det er i virkeligheden ikke andet end et udsagnsord eller <em>verbum</em>. Det er dig som programmør der skal fortolke metoden og skrive kode der udfører det ønskede.</p>
+<p>HTTP protokollen beskriver en række metoder eller verber og hvordan de er tænkt anvendt. De metoder vi kommer til at beskæftige os med i dette projekt er, <code>GET</code>, <code>POST</code>, <code>PUT</code> og <code>DELETE</code>.</p>
+<ul>
+<li>GET når vi blot vil hente data fra serveren.</li>
+<li>POST når vi vil oprette en ressource, fx uploade en ny artikel</li>
+<li>POST når vi vil opdatere en ressource, fx redigere en artikel, helt eller delvis.</li>
+<li>DELETE når vi vil fjerne en ressource, fx slette en artikel.</li>
+</ul>
+<p>Hvis du vil vide mere om HTTP protokollen og HTTP metoder kan du læse mere om det på <a href="http://www.ietf.org/rfc/rfc2616.txt">IETF's hjemmeside</a></p>
+<p>Kombinationen af endpoints og metode er bestemmende for hvordan en indkommende request skal fortolkes på serveren. Som webudvikler er det dig der skal planlægge hvilke kombinationer af endpoints og metoder serveren skal genkende og hvad responsen skal være.</p>
+<p>Derfor kan det være en god ide, allerede på et tidligt tidspunkt i udviklingsfasen, at planlægge et API og de handlinger der skal udføres.<br /> Her er et eksempel på en oplistning af et API med angivelse af metoderne for de enkelte endpoints og en kortfattet beskrivelse af hvad der skal udføres.</p>
+<p><a id="endpointTabel"></a><a href="#top">top ↑</a></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">URL</th>
+<th align="left">Endpoint</th>
+<th align="left">Metode</th>
+<th align="left">Beskrivelse</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">http://localhost/</td>
+<td align="left">'/'</td>
+<td align="left">GET</td>
+<td align="left">send index.html</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/menuitems</td>
+<td align="left">'/menuitems'</td>
+<td align="left">GET</td>
+<td align="left">send hovedmenuen</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/menuitems</td>
+<td align="left">'/menuitems'</td>
+<td align="left">POST</td>
+<td align="left">opret et menupunkt</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/menuitems</td>
+<td align="left">'/menuitems'</td>
+<td align="left">PUT</td>
+<td align="left">opdater menupunkt</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/menuitems</td>
+<td align="left">'/menuitems'</td>
+<td align="left">DELETE</td>
+<td align="left">fjern menupunkt</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/users</td>
+<td align="left">'/users'</td>
+<td align="left">GET</td>
+<td align="left">send liste med brugere</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/users</td>
+<td align="left">'/users'</td>
+<td align="left">POST</td>
+<td align="left">opret bruger</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/users</td>
+<td align="left">'/users'</td>
+<td align="left">PUT</td>
+<td align="left">opdater bruger</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/users</td>
+<td align="left">'/users'</td>
+<td align="left">DELETE</td>
+<td align="left">fjern bruger</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/article</td>
+<td align="left">'/article'</td>
+<td align="left">GET</td>
+<td align="left">send artikler</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/article</td>
+<td align="left">'/article'</td>
+<td align="left">POST</td>
+<td align="left">opret artikel</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/article</td>
+<td align="left">'/article'</td>
+<td align="left">PUT</td>
+<td align="left">opdater artikel</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/article</td>
+<td align="left">'/article'</td>
+<td align="left">DELETE</td>
+<td align="left">fjern artikel</td>
+</tr>
+<tr class="even">
+<td align="left">http://localhost/login</td>
+<td align="left">'/login'</td>
+<td align="left">POST</td>
+<td align="left">opret login session</td>
+</tr>
+<tr class="odd">
+<td align="left">http://localhost/logout</td>
+<td align="left">'/logout'</td>
+<td align="left">DELETE</td>
+<td align="left">fjern login session</td>
+</tr>
+</tbody>
+</table>
+<p><a id="3.4-request_response"></a> <a href="#top">top ↑</a></p>
+<h4 id="request-og-response">Request og Response</h4>
+<p>Som webudvikler skal du også tage stilling til hvilke dataformater der skal anvendes når clienten, her browseren, sender requests til serveren og hvilket format serveren skal anvende når den kvitterer for en request, ved at sende en response.</p>
+<p>I dette projekt har jeg valgt, at simple requests med parametre sendes som såkaldte GET parametre. Fx. når der requestes en artikel skal det være muligt enten at requeste en specifik artikel, eller requeste artikler der tilhører en bestemt kategori. Der kan være flere artikler til hver kategori. Men når det handler om formularer med brugerindtastninger skal requesten sendes som <code>multipart/form-data</code>.</p>
+<p>Eksempler på GET parametre: * <code>http://localhost/article?catid=4</code> (Request for alle artikler med kategori ID 4) * <code>http://localhost/article?artid=8</code> (Request for artiklen med artikel ID 8)</p>
+<p>Dataformatet på responsen skal i dette projekt være i form af JSON strukturer.</p>
+<p>Her er et eksempel på responsen for en GET request til <code>/menuitems</code></p>
+<pre class="sourceCode json"><code class="sourceCode json">[
+  {
+    <span class="dt">&quot;id&quot;</span>: <span class="dv">1</span>,
+    <span class="dt">&quot;name&quot;</span>: <span class="st">&quot;Hjem&quot;</span>,
+    <span class="dt">&quot;description&quot;</span>: <span class="dv">null</span>,
+    <span class="dt">&quot;created&quot;</span>: <span class="st">&quot;2017-07-28T07:08:26.000Z&quot;</span>,
+    <span class="dt">&quot;position&quot;</span>: <span class="dv">1</span>
+  },
+  {
+    <span class="dt">&quot;id&quot;</span>: <span class="dv">2</span>,
+    <span class="dt">&quot;name&quot;</span>: <span class="st">&quot;Nyheder&quot;</span>,
+    <span class="dt">&quot;description&quot;</span>: <span class="dv">null</span>,
+    <span class="dt">&quot;created&quot;</span>: <span class="st">&quot;2017-07-28T07:08:41.000Z&quot;</span>,
+    <span class="dt">&quot;position&quot;</span>: <span class="dv">2</span>
+  },
+  {
+    <span class="dt">&quot;id&quot;</span>: <span class="dv">3</span>,
+    <span class="dt">&quot;name&quot;</span>: <span class="st">&quot;Tjenester&quot;</span>,
+    <span class="dt">&quot;description&quot;</span>: <span class="dv">null</span>,
+    <span class="dt">&quot;created&quot;</span>: <span class="st">&quot;2017-07-28T07:09:04.000Z&quot;</span>,
+    <span class="dt">&quot;position&quot;</span>: <span class="dv">3</span>
+  },
+  {
+    <span class="dt">&quot;id&quot;</span>: <span class="dv">5</span>,
+    <span class="dt">&quot;name&quot;</span>: <span class="st">&quot;Kontakt&quot;</span>,
+    <span class="dt">&quot;description&quot;</span>: <span class="dv">null</span>,
+    <span class="dt">&quot;created&quot;</span>: <span class="st">&quot;2017-07-28T07:09:50.000Z&quot;</span>,
+    <span class="dt">&quot;position&quot;</span>: <span class="dv">4</span>
+  },
+  {
+    <span class="dt">&quot;id&quot;</span>: <span class="dv">4</span>,
+    <span class="dt">&quot;name&quot;</span>: <span class="st">&quot;Om os&quot;</span>,
+    <span class="dt">&quot;description&quot;</span>: <span class="dv">null</span>,
+    <span class="dt">&quot;created&quot;</span>: <span class="st">&quot;2017-07-28T07:09:43.000Z&quot;</span>,
+    <span class="dt">&quot;position&quot;</span>: <span class="dv">5</span>
+  }
+]</code></pre>
+<p>Vi ser at responsen her er formatteret som et array med 5 JSON elementer.</p>
+<p>Jeg har valgt JSON, fordi det er nemt at overskue for os mennesker. Derfor er det også forholdsvis nemt at skrive kode der kan håndtere JSON.</p>
+<p><a id="4.0-backend"></a> <a href="#top">top ↑</a></p>
+<h4 id="statiske-filer">Statiske filer</h4>
+<p>Vores API kan (endnu) ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden. Med statiske filer mener jeg filer der kun sjældent ændres.</p>
+<p>De statiske filer der kommer på tale her af type <code>.html</code>, <code>.css</code>, <code>.js</code> og diverse billedfiler som <code>.png</code>, <code>.jpg</code>, <code>.gif</code>, etc. Vi får derfor brug for at kunne bestemme hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.</p>
+<p>Vi opretter et objekt i <code>helpers.js</code> filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filertyper vi ønsker at kunne håndtere, og værdierne svarer til mimetyperne.</p>
+<p>Koden der skal tilføjes til <code>helpers.js</code>.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs = <span class="fu">require</span>(<span class="st">&#39;fs&#39;</span>);  <span class="co">// Importer filsystem-modulet</span>
+<span class="kw">const</span> path = <span class="fu">require</span>(<span class="st">&#39;path&#39;</span>);
+
+<span class="co">// De foreløbige mimetypes. Vi kan tilføje flere når behovet opstår</span>
+<span class="kw">const</span> mimetypes = {
+    <span class="st">&#39;.html&#39;</span> :  <span class="st">&#39;text/html; charset=utf-8&#39;</span>,               <span class="co">// mimetype for html</span>
+    <span class="st">&#39;.css&#39;</span>  :  <span class="st">&#39;text/css; charset=utf-8&#39;</span>,                <span class="co">// mimetype for css</span>
+    <span class="st">&#39;.js&#39;</span>   :  <span class="st">&#39;application/javascript; charset=utf-8&#39;</span>,  <span class="co">// mimetype for javascript</span>
+    <span class="st">&#39;.png&#39;</span>  :  <span class="st">&#39;image/png&#39;</span>                               <span class="co">// mimetype for png </span>
+    <span class="st">&#39;.jpg&#39;</span>  :  <span class="st">&#39;image/jpg&#39;</span>                               <span class="co">// mimetype for png </span>
+};</code></pre>
+<p>Vi skal tilføje en hjælpefunktion til vores <code>helpers.js</code>. Funktionen skal kunne læse en fil fra filsystemet og sende indholdet i filen til en browser. Derfor får vi brug for filsystem-modulet <code>fs</code>. Modulet er en del af Node installationen og skal ikke installeres.</p>
+<p>Den nye funktion kalder jeg <code>fileRespond()</code>. Funktionen skal jo sende til browseren, derfor skal den have <code>response</code> objektet som parameter. Den skal også have stien til den fil der skal læses. Stien sendes også som parameter til funktionen.</p>
+<p>Funktionen placeres i <code>helpers.js</code></p>
+<p>Her er koden til <code>fileRespond()</code></p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">exports</span>.<span class="fu">fileRespond</span> = <span class="kw">function</span>(res, fileName){
+    <span class="ot">fs</span>.<span class="fu">readFile</span>(fileName, <span class="kw">function</span>(err, fileContent){
+        <span class="co">// readFile kører asynkront, derfor skal den forsynes med en callback-funktion</span>
+        <span class="kw">if</span>(err){
+            <span class="co">// Hvis der opstod en fejl, fx. at filen ikke findes, </span>
+            <span class="co">// eller manglende læserettigheder eller lignende er vi her.</span>
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked </span>: `Filen <span class="st">&#39;${fileName}&#39;</span> blev ikke <span class="ot">fundet</span>. <span class="fu">$</span>{err}`}, <span class="dv">404</span>);
+            <span class="kw">return</span>;
+        }
+        
+        <span class="co">// Hvis vi er her, er der fundet en fil der kan læses. </span>
+        <span class="co">// Indholdet skal så sendes til browseren,</span>
+        <span class="co">// men først skal vi detektere hvilken mimetype det handler om.</span>
+        <span class="co">// Til det formål bruger vi filnavnets ekstension</span>
+        <span class="kw">var</span> ext = <span class="ot">path</span>.<span class="fu">extname</span>(fileName); <span class="co">// hent fil-ekstension</span>
+        <span class="kw">var</span> mime = mimetypes[ext] <span class="co">// brug ekstensionen til at hente mimetype</span>
+        <span class="ot">res</span>.<span class="fu">writeHead</span>(<span class="dv">200</span>, {<span class="st">&#39;Content-type&#39;</span> : mime });
+        <span class="ot">res</span>.<span class="fu">end</span>(fileContent);
+    }
+}</code></pre>
+<p>Sammenlagt ser koden i <code>helpers.js</code> nu sådan ud:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs = <span class="fu">require</span>(<span class="st">&#39;fs&#39;</span>);
+<span class="kw">const</span> path = <span class="fu">require</span>(<span class="st">&#39;path&#39;</span>);
+
+<span class="kw">const</span> mimetypes = {
+    <span class="st">&#39;.html&#39;</span> : <span class="st">&#39;text/html&#39;</span>,
+    <span class="st">&#39;.css&#39;</span>  : <span class="st">&#39;text/css&#39;</span>,
+    <span class="st">&#39;.js&#39;</span>   : <span class="st">&#39;text/js&#39;</span>,
+    <span class="st">&#39;.png&#39;</span>  : <span class="st">&#39;image/png&#39;</span>
+};
+
+<span class="ot">exports</span>.<span class="fu">fileRespond</span> = <span class="kw">function</span>(res, fileName){
+    <span class="ot">console</span>.<span class="fu">log</span>(fileName);
+    <span class="ot">fs</span>.<span class="fu">readFile</span>(fileName, <span class="kw">function</span>(err, fileContent){
+        <span class="kw">if</span>(err){
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked </span>: `Filen <span class="st">&#39;${fileName}&#39;</span> blev ikke <span class="ot">fundet</span>. <span class="fu">$</span>{err}`}, <span class="dv">404</span>);
+            <span class="kw">return</span>;
+        }
+        <span class="kw">var</span> ext = <span class="ot">path</span>.<span class="fu">extname</span>(fileName);
+        <span class="kw">var</span> mime = mimetypes[ext];
+        <span class="ot">res</span>.<span class="fu">writeHead</span>(<span class="dv">200</span>, {<span class="st">&#39;Content-type&#39;</span>: mime})
+        <span class="ot">res</span>.<span class="fu">end</span>(fileContent);
+    });
+};
+
+<span class="ot">exports</span>.<span class="fu">respond</span> = <span class="kw">function</span> (res, besked, status = <span class="dv">200</span>) {
+    <span class="ot">res</span>.<span class="fu">writeHead</span>(status, { <span class="st">&#39;Content-type&#39;</span>: <span class="st">&#39;application/json; charset=utf-8&#39;</span> });
+    <span class="ot">res</span>.<span class="fu">end</span>(<span class="ot">JSON</span>.<span class="fu">stringify</span>(besked));
+};</code></pre>
+<p>Indholdet i variablen <code>pathname</code> vil indeholde filnavnet på den fil der requestes. Hvis der ikke requestes en specifik fil, dvs. <code>pathname</code> kun indeholder <code>/</code> skal vi blot sende indholdet af <code>index.html</code>. Det kan vi gøre med vores nye funktion, <code>fileRespond()</code></p>
+<p>Med en if-sætning kan vi undersøge om <code>pathname</code> kun indeholder <code>/</code>,</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">if</span>(pathname === <span class="st">&#39;/&#39;</span>) {
+    <span class="ot">helpers</span>.<span class="fu">fileRespond</span>(res, <span class="st">&#39;public/index.html&#39;</span>); 
+}</code></pre>
+<p>Hvis browseren sender en GET-request for en fil, fx <code>css/style.css</code>, vil variablen <code>pathname</code> indeholde tekststrengen <code>css/style.css</code>. Pathname variablen vil altid indeholde requesten. Det betyder at vi kan undersøge om variablen indeholder et filnavn, eller rettere, undersøge om indholdet udgør et mønster for et filnavn. Men hvordan ser et mønster for et filnavn ud?. Lad os kigge på de filer der kan komme på tale i vores system. Det er først og fremmest html-, css-, js-, png-, og jpg-filer,</p>
+<p>Mønsteret for disse filer er at de har et filnavn bestånde af en eller flere alfanumeriske karakterer efterfulgt af punktum og derefter bogstaverne 'html', 'css', 'js', 'png', eller 'jpg'. Yderligere kan der være angivet et mappenavn foran filnavnet.</p>
+<p>Eksempler</p>
+<pre><code>index.html
+css/style.css
+js/script.js
+img/logo.png</code></pre>
+<p>For at undersøge om <code>patname</code> indeholder et filnavnmønster, har jeg valgt at bruge den indbyggede javascript metode <code>.match()</code>. Denne metode gør brug af <code>regular expression</code></p>
+<p>Men lad os kigge på hvad regular expressions er for noget og hvad det kan anvendes til.</p>
+<p>En regular expression, eller blot regex, bruges til at søge efter bestemte mønstre i en tekststreng,fx om en tekststreng indeholder et filnavn som <code>index.html</code>, eller <code>/img/logo.png</code>. De filnavne vi kommer til at arbejde med, har det til fælles at de har en ekstension der er enten <code>.html</code>, <code>.css</code>, <code>js</code>, <code>png</code> eller <code>jpg</code>. Derudover kan disse filer være placerede i mapper så stien til dem kan være fx <code>css/style.css</code> eller <code>/img/logo-png</code>.</p>
+<p>Et <code>regex</code> mønster placeres mellem to slashes, fx <code>/mønster/</code>. Det der står mellem slashene udgør mønsteret vi søger efter.</p>
+<p>Eksempel:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// Først en variabel der indeholder en tekststreng</span>
+<span class="kw">var</span> tekst = <span class="st">&quot;Roskilde Tekniske Skole&quot;</span>;
+
+<span class="co">// Vi vil undersøge om teksten indeholder &quot;Roskilde&quot;.</span>
+<span class="co">// Det kan vi bruge .match() metoden til.</span>
+<span class="kw">var</span> regExResult = <span class="ot">text</span>.<span class="fu">match</span>(<span class="ot">/Roskilde/</span>);
+
+<span class="co">// I dette eksempel vil variablen regExResult indeholde resultatet af match() funktionen</span>
+
+<span class="co">// Hvis vi udskriver variablen til konsollen vil vi se noget i stil med: </span>
+[ <span class="st">&#39;Roskilde&#39;</span>, index: <span class="dv">0</span>, input: <span class="st">&#39;Roskilde Tekniske Skole&#39;</span> ]</code></pre>
+<p>Match returnerer altså et array, hvis den finder et match. Det første element i arrayet, element 0,indeholder det som <code>match()</code> metoden har fundet, det andet element, <code>index: 0</code>, viser positionen i teksten hvor der blev fundet et match, her 0, mens det sidste element, <code>input: 'Roskilde Tekniske Skole'</code>, viser den tekststreng der blev søgt i.</p>
+<p>Hvis <code>match()</code> metoden ikke finder noget der matcher returneres <code>null</code>.</p>
+<p>Jeg vil ikke gå i dybden med regular expressions. Der findes en række websider med tutorials om regex, fx <code>https://www.w3schools.com/jsref/jsref_obj_regexp.asp</code> eller <code>https://regex101.com/</code>.</p>
+<p>Jeg vil stærkt anbefale at du bruger lidt tid på at sætte sig ind i regular expressions. Rigtig mange programmeringssprog har indbygget support for regex, og er et <em>must</em> for en programmør at kunne.</p>
+<p>Når du har lært hvordan regex virker, og har fået lidt øvelse i at opbygge regexes, kan du fortsætte her.</p>
+<p>Lad os prøve at annvende regex i forbindelse med <code>match()</code> metoden.</p>
+<p>Nedenstående kodelinie søger i <code>pathname</code> efter html, css, js, jpg, og png filnavne.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> fileRequest = <span class="ot">pathname</span>.<span class="fu">match</span>(<span class="ot">/</span><span class="fl">^\/((</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">img</span><span class="fl">)\/)?</span><span class="bn">\w</span><span class="fl">+\.(</span><span class="ot">html</span><span class="fl">|</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">png</span><span class="fl">|</span><span class="ot">jpg</span><span class="fl">)$</span><span class="ot">/</span>);   </code></pre>
+<p>Hvis der er fundet noget der matcher, returneres et array med alle matchdata til variablen <code>fileRequest</code>. Ellers returneres <code>null</code>.</p>
+<p>Det betyder at vi med en simpel <code>if</code> kan undersøge om der er fundet noget.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> fileRequest = <span class="ot">pathname</span>.<span class="fu">match</span>(<span class="ot">/</span><span class="fl">^\/((</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">img</span><span class="fl">)\/)?</span><span class="bn">\w</span><span class="fl">+\.(</span><span class="ot">html</span><span class="fl">|</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">png</span><span class="fl">|</span><span class="ot">jpg</span><span class="fl">)$</span><span class="ot">/</span>);
+<span class="kw">if</span>(fileRequest){
+    <span class="co">// Den fulde match ligger i fileRequest[0], det første element i arrayet.</span>
+    <span class="co">// Vi kan derfor sende det fundne sammen med responseobjektet til fileResponse() metoden.</span>
+    <span class="ot">helpers</span>.<span class="fu">fileResond</span>(res, fileRequest[<span class="dv">0</span>])
+}</code></pre>
+<p>Koden i <code>router.js</code> skal ser nu sådan ud.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> url = <span class="fu">require</span>(<span class="st">&#39;url&#39;</span>);
+<span class="kw">const</span> helpers = <span class="fu">require</span>(<span class="st">&#39;./helpers&#39;</span>);
+
+<span class="kw">const</span> routes = {
+    <span class="st">&#39;/cat&#39;</span>: <span class="fu">require</span>(<span class="st">&#39;./endpointhandlers/cat&#39;</span>),
+
+    <span class="st">&#39;/dog&#39;</span>: <span class="fu">require</span>(<span class="st">&#39;./endpointhandlers/dog&#39;</span>)
+};
+
+<span class="ot">module</span>.<span class="fu">exports</span> = <span class="kw">function</span> (req, res) {
+    
+    <span class="kw">var</span> pathname = <span class="ot">url</span>.<span class="fu">parse</span>(<span class="ot">req</span>.<span class="fu">url</span>).<span class="fu">pathname</span>;
+
+    <span class="kw">if</span>(pathname === <span class="st">&#39;/&#39;</span>){
+        <span class="ot">helpers</span>.<span class="fu">fileRespond</span>(res, <span class="st">&#39;public/index.html&#39;</span>);
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">var</span> regexFile = <span class="ot">pathname</span>.<span class="fu">match</span>(<span class="ot">/</span><span class="fl">^\/((</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">img</span><span class="fl">)\/)?</span><span class="bn">\w</span><span class="fl">+\.(</span><span class="ot">html</span><span class="fl">|</span><span class="ot">css</span><span class="fl">|</span><span class="ot">js</span><span class="fl">|</span><span class="ot">png</span><span class="fl">)$</span><span class="ot">/</span>);
+    <span class="kw">if</span>(regexFile){
+        <span class="ot">helpers</span>.<span class="fu">fileRespond</span>(res, <span class="st">&#39;public&#39;</span> + regexFile[<span class="dv">0</span>]);
+        <span class="kw">return</span>;
+    }
+    <span class="co">// console.log(regexFile[0]);</span>
+    
+    <span class="kw">var</span> action = routes[pathname];
+    <span class="kw">if</span> (action) {
+        <span class="kw">var</span> method = <span class="ot">req</span>.<span class="fu">method</span>;
+        <span class="kw">var</span> handler = action[method];
+
+        <span class="kw">if</span> (handler){
+            <span class="fu">handler</span>(res);
+        }
+        <span class="kw">else</span>{
+            <span class="ot">helpers</span>.<span class="fu">respond</span>(res, `Metode ${<span class="ot">req</span>.<span class="fu">method</span>} ikke tilladt`, <span class="dv">404</span>);
+            <span class="kw">return</span>;
+        }
+        <span class="co">// action(res);</span>
+        <span class="kw">return</span>;
+    }
+    <span class="co">// Hvis vi er her er der ikke fundet en route</span>
+    <span class="ot">helpers</span>.<span class="fu">respond</span>(res, <span class="st">&#39;Route findes ikke&#39;</span>, <span class="dv">404</span>);
+};</code></pre>
+<p><a id="5.0-frontend"></a> <a href="#top">top ↑</a></p>
+<hr />
+<h3 id="frontend">Frontend</h3>
+<p>I indledningen skrev jeg at frontend delen kunne deles i to; public- og administrationsdelen. I både public og admin mappen omtaler vi filerne som <em>statiske</em> filer. Blandt de statiske filer er der både i public og admin mapperne en <em>dynamisk</em> fil. Det er <code>index.html</code>. Dynamisk fordi indholdet i filen ændres dynamisk alt efter hvilket element brugeren klikker på. Selv om indholdet i disse filer ændres dynamisk vælger jeg alligevel at betragte dem som tilhørende de statiske filer fordi selve den grundlæggende kode i filen kun sjældent ændres.</p>
+<p>Her er <code>public/index.html</code></p>
+<pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html<span class="dt">&gt;</span>
+<span class="kw">&lt;html&gt;</span>
+    <span class="kw">&lt;head&gt;</span>
+        <span class="kw">&lt;meta</span><span class="ot"> charset=</span><span class="st">&quot;UTF-8&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;css/style.css&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;shortcut icon&quot;</span><span class="ot"> href=</span><span class="st">&quot;img/favicon.ico&quot;</span><span class="ot"> type=</span><span class="st">&quot;image/x-icon&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;title&gt;</span>CMS<span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;/head&gt;</span>
+    <span class="kw">&lt;body&gt;</span>
+        <span class="kw">&lt;main&gt;</span>
+            <span class="kw">&lt;header</span><span class="ot"> id=</span><span class="st">&quot;publicheader&quot;</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;span</span><span class="ot"> id=</span><span class="st">&quot;logo&quot;</span><span class="kw">&gt;&lt;img</span><span class="ot"> src=</span><span class="st">&quot;img/logo.png&quot;</span><span class="kw">&gt;&lt;/span&gt;</span>
+                
+                <span class="kw">&lt;nav</span><span class="ot"> id=</span><span class="st">&quot;publicnavigationbar&quot;</span><span class="kw">&gt;&lt;/nav&gt;</span>
+            
+            <span class="kw">&lt;/header&gt;</span>
+
+            <span class="kw">&lt;section</span><span class="ot"> id=</span><span class="st">&quot;content&quot;</span><span class="kw">&gt;&lt;/section&gt;</span> 
+        
+        <span class="kw">&lt;/main&gt;</span>
+        <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;js/articles.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+        <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;js/menu.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+    <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre>
+<p>Filen fylder ikke ret meget, men det vi skal lægge mærke til er, at den indeholder et container-tag, <code>&lt;nav id=&quot;publicnavigationbar&quot;&gt;&lt;/nav&gt;</code>, til menupunkterne, og et container-tag, <code>&lt;section id=&quot;content&quot;&gt;&lt;/section&gt;</code>, til det indhold der dynamisk skifter når brugeren klikker på et menupunkt. Begge containere er tomme til at starte med.</p>
+<p>I index.html filen linkes der til to javascript filer, <code>articles.js</code> og <code>menu.js</code>. Den første, <code>articles.js</code> indeholder kode der sender forskellige requests til backenden når der klikkes på et af menupunkterne. Det svar der kommer tilbage indsættes i &quot;content&quot; containeren. Den anden, <code>menu.js</code>, sender en request til backenden der svarer ved at sende menupunkterne tilbage. Scriptet indsætter de enkelte menupunkter i &quot;publicnavigationbar&quot; containeren.</p>
+<p>Koden til <code>public/js/menu.js</code> er gengivet nedenfor.</p>
+<p>public/js/menu.js</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">(<span class="kw">function</span> () {
+    <span class="ot">document</span>.<span class="fu">addEventListener</span>(<span class="st">&#39;DOMContentLoaded&#39;</span>, menuUpdate);
+
+    <span class="kw">function</span> <span class="fu">menuUpdate</span>() {
+        <span class="fu">fetch</span>(<span class="st">&#39;/menuitems&#39;</span>)
+            .<span class="fu">then</span>(<span class="kw">function</span> (data) {
+                <span class="kw">return</span> <span class="ot">data</span>.<span class="fu">json</span>()
+            })
+            .<span class="fu">then</span>(<span class="kw">function</span> (menuitems) {
+                <span class="kw">var</span> menu = <span class="st">&#39;&#39;</span>;
+                <span class="ot">menuitems</span>.<span class="fu">forEach</span>(<span class="kw">function</span> (item) {
+                    menu += `&lt;span <span class="kw">class</span>=<span class="st">&quot;menuitem&quot;</span> data-categoryid=<span class="st">&quot;${item.id}&quot;</span>&gt;${<span class="ot">item</span>.<span class="fu">name</span>}&lt;<span class="ot">/span&gt;`;</span>
+<span class="ot">                }</span><span class="fl">)</span><span class="ot">;</span>
+<span class="ot">                document.querySelector</span><span class="fl">(</span><span class="ot">&#39;#publicnavigationbar&#39;</span><span class="fl">)</span><span class="ot">.innerHTML = menu;</span>
+<span class="ot">            }</span><span class="fl">)</span>
+<span class="ot">            .then</span><span class="fl">(</span><span class="ot">function </span><span class="fl">()</span><span class="ot"> {</span>
+<span class="ot">                document.querySelector</span><span class="fl">(</span><span class="ot">&#39;.menuitem&#39;</span><span class="fl">)</span><span class="ot">.click</span><span class="fl">()</span><span class="ot">;</span>
+<span class="ot">            }</span><span class="fl">)</span>
+<span class="ot">            .catch</span><span class="fl">(</span><span class="ot">function </span><span class="fl">(</span><span class="ot">err</span><span class="fl">)</span><span class="ot"> {</span>
+<span class="ot">                console.log</span><span class="fl">(</span><span class="ot">err</span><span class="fl">)</span><span class="ot">;</span>
+<span class="ot">            }</span><span class="fl">)</span><span class="ot">;</span>
+<span class="ot">    }</span>
+<span class="ot">}</span><span class="fl">)()</span><span class="ot">;</span></code></pre>
+<p>Denne funktion er konstrueret som en såkaldt <em>Immediately-Invoked Function Expression (IIFE)</em> Formatet på denne konstruktion er:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">(<span class="kw">function</span>(){ 
+    <span class="co">// Kode placeres her</span>
+})()</code></pre>
+<p>Når man på den måde pakker en funktion ind i et sæt paranteser vil javascript fortolkeren opfatte funktionen som et eksekverbart udtryk (på engelsk: executable expression). Det sidste sæt paranteser gør at udtrykket eksekveres når scriptet er indlæst. Det der eksekveres i første omgang er <code>document.addEventListener()</code> der registrerer en eventlistener der lytter på <code>DOMContentLoaded</code> eventen. EventListeneren registrerer funktionen <code>menuUpdate()</code> som handler til denne event. Når eventen <code>DOMContentLoaded</code> fyres, kaldes funktionen <code>menuUpdate()</code>.</p>
+<p>Funktionen sender en <code>GET</code> request til routen <code>/menuitems</code> ved hjælp af den indbyggede funktion <code>fetch()</code>.</p>
+<p>Jeg vil ikke komme med beskrivelser hvordan <code>fetch()</code> virker. Men hvis man har lyst til at gå i dybden med <code>fetch()</code> (det kan stærkt anbefales) vil jeg henvise til at man søger mere information på nettet fx. på <code>https://scotch.io/tutorials/how-to-use-the-javascript-fetch-api-to-get-data</code> eller <code>https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch</code>.</p>
+<p>Læg mærke til at koden i <code>public/js/menu.js</code> indeholder tre <code>.then()</code> blokke. Den første konverterer responsens payload til JSON.</p>
+<p>Den næste blok gennemløber JSON strukturen i et <code>forEach()</code> loop. I loopet oprettes der et antal <code>&lt;span&gt;</code> elementer. Hvert element forsynes en data-attribut, <code>data-categoryid</code>. Den kommer til at indeholde information om hvilken kategori elementet tilhører.</p>
+<p>Den sidste blok henter en reference til det første element der har klassen <code>menuitem</code> og simulerer et museklik på elementet. I det andet script, <code>articles.js</code> er der defineret en eventListener der lytter efter click events. Det medfører at når brugeren kommer ind på siden 1. gang vil scriptet <code>articles.js</code> fange museklikket og sende en <code>GET</code> reguest til routen <code>/articles</code>. Requesten vil tilføje en parameter fx <code>catid=2</code>, hvor parameterværdien (her 2) stammer fra den føromtalte <code>data-categoryid</code>.</p>
+<p>Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi vil kunne oprette, ændre eller fjerne menupunkter fra databasen, og dermed i vores index.html.</p>
+<p>For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Men det kommer vi til i næste kapitel.</p>
+<p>Vores API kan (endnu) ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden for at det kan lade sig gøre.</p>
+<p>Vi skal tilføje en hjælpefunktion til vores <code>helpers.js</code>. Funktionen skal kunne læse en fil fra filsystemet og sende indholdet i filen til en browser. Derfor får vi brug for filsystem-modulet <code>fs</code>. Modulet er en del af Node installationen og skal ikke installeres.</p>
+<p>Som sagt er de statiske filtyper der kommer på tale her af type .html, .css, .js og diverse billedfiler som .png, .jpg, .gif, etc. Vi får derfor brug for at kunne bestemme hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.</p>
+<p>Vi opretter et objekt i <code>helpers.js</code> filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filertyper vi ønsker at kunne håndtere, og værdierne svarer til mimetyperne.</p>
+<p>Koden der skal tilføjes til <code>helpers.js</code>.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs = <span class="fu">require</span>(<span class="st">&#39;fs&#39;</span>);  <span class="co">// Importer filsystem-modulet</span>
+<span class="kw">const</span> path = <span class="fu">require</span>(<span class="st">&#39;path&#39;</span>);
+
+<span class="co">// De foreløbige mimetypes. Vi kan tilføje flere når behovet opstår</span>
+<span class="kw">const</span> mimetypes = {
+    <span class="st">&#39;.html&#39;</span> :  <span class="st">&#39;text/html; charset=utf-8&#39;</span>,               <span class="co">// mimetype for html</span>
+    <span class="st">&#39;.css&#39;</span>  :  <span class="st">&#39;text/css; charset=utf-8&#39;</span>,                <span class="co">// mimetype for css</span>
+    <span class="st">&#39;.js&#39;</span>   :  <span class="st">&#39;application/javascript; charset=utf-8&#39;</span>,  <span class="co">// mimetype for javascript</span>
+    <span class="st">&#39;.png&#39;</span>  :  <span class="st">&#39;image/png&#39;</span>                               <span class="co">// mimetype for png </span>
+    <span class="st">&#39;.jpg&#39;</span>  :  <span class="st">&#39;image/jpg&#39;</span>                               <span class="co">// mimetype for png </span>
+};</code></pre>
+<p>Vi skrive koden til en funktion der kan læse filer fra serverens filsystem, og sende filen til browseren. Jeg vælger at kalde funktionen for <code>fileRespond()</code> Funktionen skal sende information til browseren, derfor skal den have <code>response</code> objektet som parameter. Den skal også have stien til den fil der skal læses. Stien sendes også som parameter til funktionen.</p>
+<p>Funktionen placeres i <code>helpers.js</code></p>
+<p>Her er koden</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">exports</span>.<span class="fu">fileRespond</span> = <span class="kw">function</span>(res, fileName){
+    <span class="ot">fs</span>.<span class="fu">readFile</span>(fileName, <span class="kw">function</span>(err, fileContent){
+        <span class="co">// readFile kører asynkront, derfor skal den forsynes med en callback-funktion</span>
+        <span class="kw">if</span>(err){
+            <span class="co">// Hvis der opstod en fejl, fx. at filen ikke findes, </span>
+            <span class="co">// eller manglende læserettigheder eller lignende er vi her.</span>
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked </span>: `Filen <span class="st">&#39;${fileName}&#39;</span> blev ikke <span class="ot">fundet</span>. <span class="fu">$</span>{err}`}, <span class="dv">404</span>);
+            <span class="kw">return</span>;
+        }
+        
+        <span class="co">// Hvis vi er her, er der fundet en fil der kan læses. </span>
+        <span class="co">// Indholdet skal så sendes til browseren,</span>
+        <span class="co">// men først skal vi detektere hvilken mimetype det handler om.</span>
+        <span class="co">// Til det formål bruger vi filnavnets ekstension</span>
+        <span class="kw">var</span> ext = <span class="ot">path</span>.<span class="fu">extname</span>(fileName); <span class="co">// hent fil-ekstension</span>
+        <span class="kw">var</span> mime = mimetypes[ext] <span class="co">// brug ekstensionen til at hente mimetype</span>
+        <span class="ot">res</span>.<span class="fu">writeHead</span>(<span class="dv">200</span>, {<span class="st">&#39;Content-type&#39;</span> : mime });
+        <span class="ot">res</span>.<span class="fu">end</span>(fileContent);
+    }
+}</code></pre>
+<p>Koden i <code>helpers.js</code> ser nu sådan ud:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs = <span class="fu">require</span>(<span class="st">&#39;fs&#39;</span>);
+<span class="kw">const</span> path = <span class="fu">require</span>(<span class="st">&#39;path&#39;</span>);
+
+<span class="kw">const</span> mimetypes = {
+    <span class="st">&#39;.html&#39;</span> : <span class="st">&#39;text/html&#39;</span>,
+    <span class="st">&#39;.css&#39;</span>  : <span class="st">&#39;text/css&#39;</span>,
+    <span class="st">&#39;.js&#39;</span>   : <span class="st">&#39;text/js&#39;</span>,
+    <span class="st">&#39;.png&#39;</span>  : <span class="st">&#39;image/png&#39;</span>
+};
+
+<span class="ot">exports</span>.<span class="fu">fileRespond</span> = <span class="kw">function</span>(res, fileName){
+    <span class="ot">console</span>.<span class="fu">log</span>(fileName);
+    <span class="ot">fs</span>.<span class="fu">readFile</span>(fileName, <span class="kw">function</span>(err, fileContent){
+        <span class="kw">if</span>(err){
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked </span>: `Filen <span class="st">&#39;${fileName}&#39;</span> blev ikke <span class="ot">fundet</span>. <span class="fu">$</span>{err}`}, <span class="dv">404</span>);
+            <span class="kw">return</span>;
+        }
+        <span class="kw">var</span> ext = <span class="ot">path</span>.<span class="fu">extname</span>(fileName);
+        <span class="kw">var</span> mime = mimetypes[ext];
+        <span class="ot">res</span>.<span class="fu">writeHead</span>(<span class="dv">200</span>, {<span class="st">&#39;Content-type&#39;</span>: mime})
+        <span class="ot">res</span>.<span class="fu">end</span>(fileContent);
+    });
+};
+
+<span class="ot">exports</span>.<span class="fu">respond</span> = <span class="kw">function</span> (res, besked, status = <span class="dv">200</span>) {
+    <span class="ot">res</span>.<span class="fu">writeHead</span>(status, { <span class="st">&#39;Content-type&#39;</span>: <span class="st">&#39;application/json; charset=utf-8&#39;</span> });
+    <span class="ot">res</span>.<span class="fu">end</span>(<span class="ot">JSON</span>.<span class="fu">stringify</span>(besked));
+};</code></pre>
+<p>Men inden vi tilføjer mere kode skal vi oprette mapper til vores statiske filer. Jeg har valgt at placere alle statiske filer i en mappe jeg kalder <code>public</code>. Inde i denne mappe vil jeg, til at begynde med, placere en html-fil samt tre undermapper <code>js</code>, <code>css</code> og <code>img</code>. Mapperne er tænkt til at indeholde henholdsvis javascript-, stylesheet- og billedfiler. Efter at have oprettet disse filer, ser mappestrukturen således ud:</p>
+<pre><code>├── endpointhandlers
+│   ├── cat.js
+│   └── dog.js
+│
+├── public
+│   ├── css
+│   │   └── style.css
+│   │
+│   ├── img
+│   │   ├── logo.png
+│   │   └── anonymprofil.png
+│   │
+│   ├── js
+│   │   └── script.js
+│   │
+│   └── index.html
+│
+├── helpers.js
+├── router.js
+└── server.js</code></pre>
+<p><a name="database"></a><a href="#top">top ↑</a> ### 3. Del. Databasen.</p>
+<pre><code>├── data
+│   └── database.js
+│
+├── endpointhandlers
+│   ├── cat.js
+│   └── dog.js
+│
+├── public
+│   ├── css
+│   │   └── style.css
+│   │
+│   ├── img
+│   │   ├── logo.png
+│   │   └── anonymprofil.png
+│   │
+│   ├── js
+│   │   └── script.js
+│   │
+│   └── index.html
+│
+├── helpers.js
+├── router.js
+└── server.js</code></pre>
+<p>Lad os kigge på <code>database.js</code> filen.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> helpers = <span class="fu">require</span>(<span class="st">&#39;./../helpers&#39;</span>);
+<span class="kw">const</span> mysql = <span class="fu">require</span>(<span class="st">&#39;mysql2&#39;</span>);
+
+<span class="co">// objekt til database credentials</span>
+<span class="kw">const</span> dbcreds = {
+    <span class="dt">user </span>: <span class="st">&#39;wwwuser&#39;</span>,
+    <span class="dt">password </span>: <span class="st">&#39;wwwuser&#39;</span>,
+    <span class="dt">host </span>: <span class="st">&#39;localhost&#39;</span>,
+    <span class="dt">database </span>: <span class="st">&#39;demo-cms&#39;</span>
+};
+
+<span class="co">// Opret forbindelse til databasen</span>
+<span class="kw">var</span> connection = <span class="ot">mysql</span>.<span class="fu">createConnection</span>(dbcreds);</code></pre>
+<p>Hvis det lykkes at oprette en forbindelse til databasen, vil variablen <code>connection</code> indeholde et database objekt der har forbindelse til databasen. Objektet indeholder metoder der kan manipulere med databasen.</p>
+<p>Næste skridt er at exportere en metode, eller funktion der kan hente data fra databasen. Metoden skal tage et response objekt, en sql streng samt en callback funktion der kan tage imod de data der kommer fra databasen.</p>
+<p>Med den tilføjede kode ser indholdet i <code>database.js</code> sådan ud.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> mysql = <span class="fu">require</span>(<span class="st">&#39;mysql2&#39;</span>);
+<span class="kw">const</span> helpers = <span class="fu">require</span>(<span class="st">&#39;./../helpers&#39;</span>);
+
+<span class="kw">const</span> creds = {
+    <span class="dt">host </span>: <span class="st">&#39;localhost&#39;</span>,
+    <span class="dt">user </span>: <span class="st">&#39;wwwuser&#39;</span>,
+    <span class="dt">password </span>: <span class="st">&#39;wwwuser&#39;</span>,
+    <span class="dt">database </span>: <span class="st">&#39;demo-cms&#39;</span>
+};
+
+<span class="kw">const</span> connection = <span class="ot">mysql</span>.<span class="fu">createConnection</span>(creds);
+
+<span class="ot">exports</span>.<span class="fu">select</span> = <span class="kw">function</span>(res, sql, callback){
+    <span class="ot">connection</span>.<span class="fu">query</span>(sql, <span class="kw">function</span>(err, data){
+        <span class="kw">if</span>(err){
+            <span class="ot">helpers</span>.<span class="fu">respond</span>(res, {<span class="dt">besked </span>: <span class="st">&#39;Der opstod en fejl...&#39;</span>}, <span class="dv">404</span>);
+            <span class="kw">return</span>
+        }
+        <span class="fu">callback</span>(data);
+    })
+}</code></pre>
+<p>Men inden vores frontend kan hente data fra databasen skal vi oprette to routes, <code>/menuitems</code> og <code>/article</code>. Disse to routes skal i første omgang kunne håndtere <code>GET</code> requests fra browseren. Når vi tilføjer en route til systemet er fremgangsmåden at vi opretter en fil i mappen <code>endpointhandlers</code> med de nødvendige endpointhandlere. Derefter importerer vi den nye fil i vores <code>router.js</code> modul sådan at den også bliver en del af <code>routes</code> variablen.</p>
+<p>Filerne med de nye endpointhandlere kalder jeg henholdsvis <code>menuitems.js</code> og <code>article.js</code>.</p>
+<p>endpointhandlers/menuitems.js</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> helpers = <span class="fu">require</span>(<span class="st">&#39;./../helpers&#39;</span>);
+<span class="kw">const</span> database = <span class="fu">require</span>(<span class="st">&#39;./../data/database&#39;</span>);
+
+<span class="ot">module</span>.<span class="fu">exports</span> = {
+    <span class="st">&#39;GET&#39;</span> : <span class="kw">function</span>(req, res){
+        <span class="kw">var</span> sql = <span class="st">&quot;SELECT * FROM menu ORDER BY position&quot;</span>;
+        <span class="ot">database</span>.<span class="fu">menuselect</span>(res, sql, <span class="kw">function</span>(data){
+            <span class="ot">helpers</span>.<span class="fu">respond</span>(res, data);
+        });
+    }
+}</code></pre>
+<p>I <code>article.js</code> der indeholder koden for endpointhandleren <code>/article</code></p>
+<p>/////////////////////////////////////////////////////////////////// articles.js ```javascript const helpers = require('./../helpers'); const database = require('./../data/database'); const url = require('url'); const qs = require('querystring');</p>
+<p>module.exports = { 'GET' : function(req, res){ var cond, values; var query = url.parse(req.url).query var params = qs.parse(query); // Hvis params.catid, så hent artikler med cat_id // Hvis params.artid, så hent artiklen med artid if(params.catid){ cond = 'category_id'; values = [params.catid]; } if(params.artid){ cond = 'id'; values = [params.artid]; } var sql = <code>select * from articles where ${cond} = ?</code>; database.articleselect(res, sql, values, function(data){ helpers.respond(res, data); });<br /> },</p>
+<p><a id="clientside" name="clientside"></a><a href="#top">top ↑</a> ### Clientside</p>
+<p>Vi har tidligere omtalt de statiske filer som vores system også skal bestå af. Disse filer placeres i public-mappen og public-mappens undermapper.</p>
+<p>Først <code>index.html</code></p>
+<pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html<span class="dt">&gt;</span>
+<span class="kw">&lt;html&gt;</span>
+    <span class="kw">&lt;head&gt;</span>
+        
+        <span class="kw">&lt;meta</span><span class="ot"> charset=</span><span class="st">&quot;UTF-8&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;css/style.css&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;shortcut icon&quot;</span><span class="ot"> href=</span><span class="st">&quot;../misc/favicon.ico&quot;</span><span class="ot"> type=</span><span class="st">&quot;image/x-icon&quot;</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;title&gt;</span>CMS<span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;/head&gt;</span>
+    <span class="kw">&lt;body&gt;</span>
+        <span class="kw">&lt;main&gt;</span>
+            <span class="kw">&lt;header</span><span class="ot"> id=</span><span class="st">&quot;publicheader&quot;</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;span</span><span class="ot"> id=</span><span class="st">&quot;logo&quot;</span><span class="kw">&gt;&lt;img</span><span class="ot"> src=</span><span class="st">&quot;img/logo.png&quot;</span><span class="kw">&gt;&lt;/span&gt;</span>
+                
+                <span class="kw">&lt;nav</span><span class="ot"> id=</span><span class="st">&quot;publicnavigationbar&quot;</span><span class="kw">&gt;&lt;/nav&gt;</span>
+            
+            <span class="kw">&lt;/header&gt;</span>
+            <span class="kw">&lt;section</span><span class="ot"> id=</span><span class="st">&quot;content&quot;</span><span class="kw">&gt;</span>Content<span class="kw">&lt;/section&gt;</span> 
+        <span class="kw">&lt;/main&gt;</span>
+        <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;js/articles.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+        <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;js/menu.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+    <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre>
+<p>Filen fylder ikke ret meget. Det vi skal lægge mærke til er den indeholder et container-tag til menupunkterne: <code>&lt;nav id=&quot;publicnavigationbar&quot;&gt;&lt;/nav&gt;</code> Containeren er tom til at starte med. For at indsætte indhold i form af menupunkter skal vi skrive et clientside javascript der sender en <code>GET</code> request til routen <code>/menuitems</code>.</p>
+<p>Vi skal også skrive et script der kan hente artikler fra serveren og indsætte dem i containeren <code>&lt;section id=&quot;content&quot;&gt;Content&lt;/section&gt;</code></p>
+<p>Det er de to scripts linkes til i bunden af html-filen.</p>
+<p>Lad os kigge på den ene af filerne, <code>menu.js</code>. Den skal placeres i <code>public/js</code> mappen. Koden skal sende en <code>GET</code> request til routen <code>/menuitems</code>. Serveren svarer tilbage med en JSON array-struktur der består af de enkelte menupunkter. Koden gennemløber arrayet og placerer de enkelt menupunkter i menu-containeren. Selve requesten sendes som et AJAX kald. På den måde undgår vi at hele siden reloades. Scriptet opdaterer kun menu-containeren.</p>
+<p>Koden er gengivet nedenfor.</p>
+<p>public/js/menu.js</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="fu">fetch</span>(<span class="st">&#39;/menuitems&#39;</span>) <span class="co">// Vi bruger fetch() til at hente data fra serveren</span>
+    .<span class="fu">then</span>(<span class="kw">function</span>(data){   <span class="co">// Serveren svarer med data...</span>
+        <span class="kw">return</span> <span class="ot">data</span>.<span class="fu">json</span>()  <span class="co">// ...hvor vi trækker payloaden ud som et JSON objekt...</span>
+    })
+    .<span class="fu">then</span>(<span class="kw">function</span>(menuitems){ <span class="co">// ...JSON objektet havner i menuitems</span>
+        <span class="kw">var</span> menu = <span class="st">&#39;&#39;</span>;
+        <span class="ot">menuitems</span>.<span class="fu">forEach</span>(<span class="kw">function</span>(item){   
+            <span class="co">// ...menuitems er et array som vi gennemløber i et loop</span>
+            menu += <span class="st">&#39;&lt;span class=&quot;menuitem&quot;&gt;&#39;</span> + <span class="ot">item</span>.<span class="fu">name</span> + <span class="st">&#39;&lt;/span&gt;&#39;</span>;
+        });
+        <span class="ot">document</span>.<span class="fu">querySelector</span>(<span class="st">&#39;#publicnavigationbar&#39;</span>).<span class="fu">innerHTML</span> = menu;
+    })
+    .<span class="fu">then</span>(<span class="kw">function</span> () {
+        <span class="ot">document</span>.<span class="fu">querySelector</span>(<span class="st">&#39;.menuitem&#39;</span>).<span class="fu">click</span>();  <span class="co">// Simuler et museklik ved at aktivere click eventen.</span>
+    })
+    .<span class="fu">catch</span>(<span class="kw">function</span>(err){
+        <span class="ot">console</span>.<span class="fu">log</span>(err);
+    });</code></pre>
+<p>Læg mærke til at koden indeholder tre <code>.then()</code> blokke. Den sidste blok henter en reference til det første element der har klassen <code>menuitem</code> og simulerer et museklik på elementet. Det medfører at når brugeren kommer ind på siden 1. gang vil artiklerne der hører til dette 1. menupunkt blive vist.</p>
+<p>Det andet script <code>articles.js</code> sender på samme måde en <code>GET</code> reguest til routen <code>/articles</code></p>
+<p>Senere i forløbet skal vi opbygge admininstrationsdelen af vores CMS, hvor vi vil kunne oprette, ændre eller fjerne menupunkter fra databasen, og dermed i vores index.html.</p>
+<p>For at brugere skal få adgang til administrationssiden, skal de først gennem en login side. Næste kapitel vil handle om loginsystemet.</p>
+<p><a name="login"></a>[^ tilbage](#top) ### Login Vores loginsystem anvender <em>cookies</em>. Men først en lille gennemgang af hvad cookies er for en størrelse.</p>
+<p>Cookies er i bund og grund ikke andet end en stump tekst. Typisk organiseret som et eller flere <em>name/value</em> par. Via http headere, kan vi sende cookies til en browser, ligesom browseren også er i stand til at sende cookies via http headere. Når en eller flere cookies modtages af en browser, lagrer den disse og holder styr på hvilket domæne hver enkelt cookie tilhører. Når browseren igen sender en http request til en server vil den automatisk medsende de cookies der tilhører det pågældende domæne. Cookies der er oprettet af andre domæner vil ikke blive sendt med. Kun cookies der 'tilhører' domænet. På den måde er det muligt for browseren at gemme information om de enkelte domæner i cookies. En måde at anvende cookies på, er i forbindelse med login. Hvis en bruger er logget ind kan man lade en cookie indholde information der kan verificere, at brugeren er logget ind.</p>
+<p>Det er også muligt at sætte et <code>expire</code> timestamp for hver enkelt cookie. Når dette timestamp overskrides, vil browseren automatisk slette den pågældende cookie.</p>
+<p>Når vi skal oprette en eller flere cookies kan vi gøre det sådan: Eksempel.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> cookieValue1 = <span class="st">&#39;Værdi1&#39;</span>, cookieValue2 = <span class="st">&#39;Værdi2&#39;</span>
+<span class="ot">response</span>.<span class="fu">setHeader</span>(<span class="st">&#39;Set-Cookie&#39;</span>, [<span class="st">&#39;cookie1=&#39;</span> + cookieValue1, <span class="st">&#39;cookie2=&#39;</span> + cookieValue2]);</code></pre>
+<p>I eksemplet sætter vi en HTTP header med to cookies, <code>cookie1</code> og <code>cookie2</code> med værdierne i de to foruddefinerede variabler, <code>cookieValue1</code> og <code>cookivalue2</code></p>
+<p>Hvis vi ønsker at sætte en <code>expire</code> timestamp for en cookie, kan vi gøre det således:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">response</span>.<span class="fu">setHeader</span>(<span class="st">&#39;Set-Cookie&#39;</span>, [<span class="st">&#39;id=1234; expire=2017-12-24T23:59:59.000Z&#39;</span>]);</code></pre>
+<p>Denne cookie, der har navnet 'id' og værdien '1234', vil udløbe juleaften et sekund før midnat.</p>
+<p>Men vi får også brug for at kunne læse indkommende cookies på serveren. Vi kan hente den 'rå' cookietekst fra request objektet.</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> cookie = <span class="ot">request</span>.<span class="ot">headers</span>.<span class="fu">cookie</span>;</code></pre>
+<p>Lad os skrive koden til <code>cookieparser</code> funktion</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">getCookies</span>(req) { 
+    <span class="kw">var</span> cookies = {}, cookieParts = [];
+
+    <span class="co">// Hvis der eksisterer en (eller flere) cookies...</span>
+    <span class="kw">if</span>(<span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span>){
+        <span class="ot">cookies</span>.<span class="fu">raw</span> = <span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span>;   <span class="co">// hent den &#39;rå&#39; cookie</span>
+        cookieParts = <span class="ot">cookies</span>.<span class="ot">raw</span>.<span class="fu">split</span>(<span class="st">&#39;;&#39;</span>) {
+        <span class="ot">cookieParts</span>.<span class="fu">forEach</span>(<span class="kw">function</span>(part){
+            <span class="kw">if</span>(<span class="ot">part</span>.<span class="fu">match</span>(<span class="ot">/=/</span>){
+                <span class="kw">var</span> name = <span class="fu">decodeURI</span>(<span class="ot">part</span>.<span class="fu">split</span>(<span class="st">&#39;=&#39;</span>).<span class="fu">trim</span>()[<span class="dv">0</span>]) <span class="co">// navne-delen af cookien</span>
+                <span class="kw">var</span> value = <span class="fu">decodeURI</span>(<span class="ot">part</span>.<span class="fu">split</span>(<span class="st">&#39;=&#39;</span>).<span class="fu">trim</span>()[<span class="dv">1</span>]) <span class="co">// værdi-delen af cookien</span>
+                cookies[name] = value; <span class="co">// indsæt delene i cookies-objektet</span>
+            }
+    }); 
+    <span class="kw">return</span> cookies; <span class="co">// Returner objektet</span>
+} </code></pre>
+<p>Funktionen tager et request objekt som parameter og returnerer et objekt med de cookies der blev modtaget af serveren. Hvis der ikke blev modtaget nogen cookie, vil funktionen returnere et tomt objekt.</p>
+<p>Ud over vores cookie-parser funktion får vi brug for at kunne læse form-data der submittes til serveren som en POST request.</p>
+<p><del>Når en form submittes til serveren vil request objektets 'data' og 'end' events kunne bruges til at styre indlæsningen af de indkommende form-data.</del>~</p>
+<p>Efter en del overvejelser har jeg besluttet at bruge et tredieparts modul til at læse indkommende formdata. Blandt de mange muligheder der findes, har jeg valgt at bruge modulet <code>multiparty</code>. Dette modul har en simpel API, er nemt at bruge og har kun en enkelt dependency. Det betyder at når man installerer dette modul vil det kun være enkelt modul der yderligere bliver installeret. Jeg er af den opfattelse, at jo færre dependencies, jo bedre. I denne sammenhæng skal man huske at importere <code>multiparty</code> modulet i <code>helpers.js</code> filen med <code>require()</code> funktionen</p>
+<p>Eksempel på anvendelse af multiparty:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> multiparty = <span class="fu">require</span>(<span class="st">&#39;multiparty&#39;</span>);
+
+<span class="kw">function</span> getFormData = <span class="kw">function</span>(req, res, callback){
+    <span class="kw">var</span> form = <span class="kw">new</span> <span class="ot">multiparty</span>.<span class="fu">Form</span>();
+
+    <span class="ot">form</span>.<span class="fu">parse</span>(req, <span class="kw">function</span>(err, fields, files){
+        <span class="kw">if</span>(err){
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked</span>: <span class="st">&#39;Der opstod en fejl&#39;</span>}, <span class="dv">404</span>);
+            <span class="ot">console</span>.<span class="fu">log</span>(err);
+            <span class="kw">return</span>;
+        }
+        <span class="fu">callback</span>(fields, files);
+    });
+    
+};
+<span class="co">// Oprindelig kode er udkommenteret</span>
+<span class="co">// function getFormData(req, callback){</span>
+<span class="co">//    var userdata = &#39;&#39;;</span>
+<span class="co">//    req.on(&#39;data&#39;, function(data){  // bruger &#39;data&#39; eventen...</span>
+<span class="co">//        userdata += data;   // ...til at trække formdata ind i variablen &#39;userdata&#39;</span>
+<span class="co">//    });</span>
+<span class="co">//    req.on(&#39;end&#39;, function(){   // </span>
+<span class="co">//        var formData = qs.parse(userdata);</span>
+<span class="co">//        callback(formData);</span>
+<span class="co">//    });</span>
+<span class="co">//};</span></code></pre>
+<p><del>Funktionen tager to parametre, request objektet og en callback funktion. Ved indkommende data vil request objektets 'data' event indtræffe. Den bruger vi til at eksekvere en funktion der overfører alle de submittede data til variablen <code>userData</code> Når alle data er overført, vil 'end' eventen indtræffe og eksekvere en funktion. Denne funktion bruger <code>querystring</code> mudulet til at parse <code>userData</code> og placerer resultatet i variablen <code>formData</code>. Tilsidst fodres callback funktionen med denne variabel.</del>~</p>
+<p>Funktionen tager tre parametre, request og response objekterne og en callback funktion. Ved indkommende data vil <code>multiparty</code> parse indkommende data fra <code>request</code> objektet og placere resultaterne i variablene <code>fields</code> og <code>files</code>, hvor <code>fields</code> indeholder form data og <code>files</code> indholder uploadede filer. Tilsidst fodres callback funktionen med disse variable.</p>
+<p>Både <code>getCookies()</code> og <code>getFormData()</code> funktionerne skal tilføjes til <code>helpers.js</code> filen.</p>
+<p>Tilføjet til <code>helpers.js</code></p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">exports</span>.<span class="fu">getCookies</span> = <span class="kw">function</span>(req){
+    <span class="kw">var</span> cookies = {}, cookieParts = [];
+    <span class="kw">if</span>(<span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span>){
+        <span class="ot">cookies</span>.<span class="fu">raw</span> = <span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span>;
+        cookieParts = <span class="ot">cookies</span>.<span class="ot">raw</span>.<span class="fu">split</span>(<span class="st">&#39;;&#39;</span>);
+        <span class="ot">cookieParts</span>.<span class="fu">forEach</span>(<span class="kw">function</span>(cp){
+            <span class="kw">var</span> name = <span class="fu">decodeURI</span>(<span class="ot">cp</span>.<span class="fu">split</span>(<span class="st">&#39;=&#39;</span>)[<span class="dv">0</span>].<span class="fu">trim</span>());
+            <span class="kw">var</span> value = <span class="fu">decodeURI</span>(<span class="ot">cp</span>.<span class="fu">split</span>(<span class="st">&#39;=&#39;</span>)[<span class="dv">1</span>].<span class="fu">trim</span>());
+            cookies[name] = value;
+        });
+    }
+    <span class="kw">return</span> cookies;
+};
+
+
+<span class="ot">exports</span>.<span class="fu">redirect</span> = <span class="kw">function</span>(res, url){
+    <span class="ot">res</span>.<span class="fu">writeHead</span>(<span class="dv">302</span>, {<span class="st">&#39;location&#39;</span>: url});
+    <span class="ot">res</span>.<span class="fu">end</span>();
+};
+
+<span class="ot">exports</span>.<span class="fu">getFormData</span> = <span class="kw">function</span>(req, res, callback){
+    <span class="kw">var</span> form = <span class="kw">new</span> <span class="ot">multiparty</span>.<span class="fu">Form</span>();
+    <span class="ot">form</span>.<span class="fu">parse</span>(req, <span class="kw">function</span>(err, fields, files){
+        <span class="kw">if</span>(err){
+            <span class="ot">exports</span>.<span class="fu">respond</span>(res, {<span class="dt">besked</span>: <span class="st">&#39;Der opstod en fejl&#39;</span>}, <span class="dv">404</span>);
+            <span class="ot">console</span>.<span class="fu">log</span>(err);
+            <span class="kw">return</span>;
+        }
+        <span class="fu">callback</span>(fields, files);
+    });
+};</code></pre>
+<p>Mens man udvikler er det en god hjælp, at alle indkommende requests udskrives på server terminalen. Derfor har jeg tilføjet et modul, <code>logger</code>, i filen <code>logger.js</code>. Modulet udskriver forskellige informationer til konsollen. Det er muligt at styre hvilke informationer der logges ved hjælp af parameteren <code>level</code> der defaulter til 3</p>
+<p>Koden til <code>logger.js</code> er gengivet her:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// LOGGER</span>
+<span class="co">// level 0: Kun timestamp </span>
+<span class="co">// level 1: Timestamp og Remote-address</span>
+<span class="co">// level 2: Timestamp, Remote-address og url</span>
+<span class="co">// level 3: Timestamp, Remote-address, url og method (Default)</span>
+<span class="co">// level 4: Timestamp, Remote-address, url method og cookies</span>
+<span class="ot">module</span>.<span class="fu">exports</span> = <span class="kw">function</span>(req, level = <span class="dv">3</span>){
+    <span class="kw">var</span> cookies = <span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span> ? <span class="ot">req</span>.<span class="ot">headers</span>.<span class="fu">cookie</span> : <span class="st">&#39;none&#39;</span>;
+    <span class="kw">var</span> logTxt = <span class="kw">new</span> <span class="fu">Date</span>().<span class="fu">toString</span>();
+        logTxt += level &gt;= <span class="dv">1</span>? `; From: ${<span class="ot">req</span>.<span class="ot">connection</span>.<span class="fu">remoteAddress</span>}` : <span class="st">&#39;&#39;</span>;
+        logTxt += level &gt;= <span class="dv">2</span>? `; URL: ${<span class="ot">req</span>.<span class="fu">url</span>}` : <span class="st">&#39;&#39;</span>;
+        logTxt += level &gt;= <span class="dv">3</span>? `; Method: ${<span class="ot">req</span>.<span class="fu">method</span>}` : <span class="st">&#39;&#39;</span>;
+        logTxt += level &gt;= <span class="dv">4</span>? `; Cookies: ${cookies}` : <span class="st">&#39;&#39;</span>;
+    <span class="ot">console</span>.<span class="fu">log</span>(logTxt);
+}</code></pre>
+<p>Logger.js skal så importeres i <code>router.js</code>. Logger funktionen kan så kaldes som det første funktionskald i <code>router.js</code>.</p>
+<p>Eksempel uddrag fra <code>router.js</code></p>
+<pre><code>// Importer logger
+const logger = require(&#39;./logger&#39;);
+
+// Denne funktion er arbejdshesten. Den kaldes hver gang serveren modtager en request fra en client
+module.exports = function(req, res){
+    // Funktionskald til logger() i starten af router-functionen.
+    logger(req, 4);
+    // -- slut på uddrag
+</code></pre>
+<p>Fortsættes...</p>
