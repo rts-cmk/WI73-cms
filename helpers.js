@@ -85,15 +85,19 @@ exports.getFormData = function(req, res, callback){
         }
         callback(fields, files);
     });
-    // var userData = '';
-    // var formData;
-    // req.on('data', function(d){
-    //     userData += d;
-    // });
-    // req.on('end', function(){
-    //     formData = qs.parse(userData);
-    //     callback(formData);
-    // });
+
+// Oprindelig kode er udkommenteret
+// function getFormData(req, callback){
+//    var userdata = '';
+//    req.on('data', function(data){  // bruger 'data' eventen...
+//        userdata += data;   // ...til at trække formdata ind i variablen 'userdata'
+//    });
+//    req.on('end', function(){   // 
+//        var formData = qs.parse(userdata);
+//        callback(formData);
+//    });
+
+
 };
 
 // Returnerer true hvis obj er tomt, ellers returneres false.
