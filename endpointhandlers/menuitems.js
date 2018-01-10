@@ -2,7 +2,7 @@ const helpers = require('./../helpers');
 const database = require('./../data/database');
 
 module.exports = {
-    // Henter alle menupunkter fra databasen og sender dem retur
+    // Public adgang. Henter alle menupunkter fra databasen og sender dem retur.
     'GET': function (req, res) {
         var params = helpers.getQueryParams(req);
         var sql = "SELECT * FROM menu ORDER BY position";
@@ -10,7 +10,7 @@ module.exports = {
             helpers.respond(res, data);
         });
     },
-
+    // Login beskyttet
     'POST' : function(req, res){
         helpers.getFormData(req, res, function(formData){
             if(helpers.objEmpty(formData)){
@@ -24,7 +24,7 @@ module.exports = {
             })
         });
     },
-
+    // Login beskyttet
     'DELETE' : function(req, res){
         helpers.getFormData(req, res, function(formData){
             if(helpers.objEmpty(formData)){
@@ -39,7 +39,7 @@ module.exports = {
         });
     },
 
-    // Opdaterer et menupunkts 'name' og/eller 'position' i databasen
+    // Login beskyttet. Opdaterer et menupunkts 'name' og/eller 'position' i databasen
     'PUT': function (req, res) {
         
         var cookie = helpers.getCookies(req)  // Først hentes browserens cookie fra det indkommende request... 

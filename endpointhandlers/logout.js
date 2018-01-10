@@ -6,7 +6,7 @@ module.exports = {
         var cookie = helpers.getCookies(req);
         database.deleteSession(res, cookie, function (data) {
             if (helpers.objEmpty(data)) {
-                helpers.respond(res, { besked: "Logout mislykkedes" });
+                helpers.respond(res, { besked: "Logout mislykkedes" }, 503);
                 return;
             }
             res.setHeader('Set-cookie', ['id=0'])
