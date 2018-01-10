@@ -89,7 +89,7 @@ section#content{
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 .tbl-container{
     /* max-width: 50%; */
-    min-width: 30%;
+    /* min-width: 30%; */
     min-height: 50px;
     display: table;
     margin: auto;

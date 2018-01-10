@@ -1,10 +1,40 @@
+function articleUpdate(caller){
+    var frmId = caller.dataset.frm;
+    var frm = document.querySelector(`#${frmId}`);
+    var frmData = new FormData(frm);
+    if(frmData.get('title').length < 1){
+        alert('Artiklen må ikke være uden overskrift');
+        return;
+    }
+    if(frmData.get('article').length < 1){
+        alert('Artiklen må ikke være tom.');
+        return;
+    }
+    if(frmData.get('catId') == 0){
+        alert('Kategori skal være valgt');
+        return;
+    }
+    fetch('/article', {credentials : 'include', method : 'put', body : frmData})
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                                
+        document.querySelector('div[data-cmd="edit"]').click();
+    })
+}
+
 function articleDelete(caller){
     var dd;
     var ddVal = document.querySelector('#ddArtId').value;
     var form = document.querySelector(`#${caller.dataset.id}`);
     var formdata = new FormData(form);
     fetch('/article',{method : 'delete', credentials : 'include', body : formdata})
-    .then(function(data){
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                                
         document.querySelector('div[data-cmd="edit"]').click();
     });
 }
@@ -27,7 +57,11 @@ function articleAdd(caller){
         return;
     }
     fetch('/article',{credentials:'include', method: 'post', body: frmData})
-    .then(function(data){
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                        
         document.querySelector('div[data-cmd="article"]').click();
     })
     .catch(function(err){
@@ -36,16 +70,18 @@ function articleAdd(caller){
 }
 
 function articleEdit(caller){
-    // alert(caller.dataset.artid);
     article(caller.dataset.artid);
-    // return;
 }
 
 // Dropdownbox med artikelkategorier
 function edit(id){
     fetch('/menuitems', {method: 'get'})
-    .then(function(data){
-        return data.json();
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                                
+        return serverResponse.json();
     })
     .then(function(jsonData){
         if(jsonData){
@@ -53,9 +89,6 @@ function edit(id){
             dropdown.id = 'ddArtId';
             dropdown.name = "catId";
             dropdown.addEventListener('change',articleOverview, true);
-            // dropdown.onchange = function(){
-            //     articleOverview(this)
-            // };
             var option = document.createElement("option");
             option.value = 0;
             option.textContent = "Vælg kategori";
@@ -82,15 +115,19 @@ function edit(id){
 function articleOverview(e){
     var caller = e.target;
     fetch('/article?catid='+caller.value, {method:'get'})
-    .then(function(data){
-        return data.json();
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                                
+        return serverResponse.json();
     })
     .then(function(jsonData){
         if(jsonData && jsonData.length > 0){
             // opret container
             var editContainer = document.querySelector("#editContainer");
             while(editContainer.childNodes.length > 1) {
-                 editContainer.removeChild(editContainer.lastChild);
+                editContainer.removeChild(editContainer.lastChild);
             }
             var hr = document.createElement('hr')
             hr.style.margin = '10px';
@@ -165,8 +202,12 @@ function articleOverview(e){
 function article(artId){
     artId = parseInt(artId) || null;
     fetch('/menuitems', {method : 'get'})
-    .then(function(data){
-        return data.json();
+    .then(function(serverResponse){
+        if(serverResponse.redirected){
+            // Hvis response objectets 'redirected' er true...
+            location = serverResponse.url; // ...så send browseren til redirected url'en...
+        }                                
+        return serverResponse.json();
     })
     .then(function(jsonData){
         if(jsonData){
@@ -202,6 +243,11 @@ function article(artId){
             var btn = document.createElement('button');
             btn.type = "button";
             if(artId){
+                var articleId = document.createElement('input');
+                articleId.type = 'hidden';
+                articleId.value = artId;
+                articleId.name = 'artid';
+                form.appendChild(articleId);
                 btn.dataset.cmd = "articleUpdate"
                 btn.dataset.artid = artId
                 btn.innerHTML = "Update";
