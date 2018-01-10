@@ -30,19 +30,21 @@ module.exports = function(req, res){
     rx = /^\/(admin\/(img\/|css\/|js\/)?[\w-]+\.(html|png|js|css))$/i;
     var adminFile = pathname.match(rx);
     if(adminFile){
-        // Hvis der requestes for en fil i admin-mapen er det nødvendigt at 
-        // at checkke om brugersessionen er gyldig.
+        // Alle filer i admin-mappen er login beskyttede.
+        // Derfor er det  nødvendigt at checkke om brugersessionen er gyldig.
         var cookie = helpers.getCookies(req);
         database.verifySession(res, cookie, function(data){
             if(helpers.objEmpty(data)){
+                // Hvis brugeren ikke er logget ind er vi her.
                 helpers.redirect(res, '/')
                 return;
             }
+            // Hvis brugeren er logget ind er vi her
             helpers.fileRespond(res, adminFile[1]);
         });
         return;
     }
-
+    // Hvis vi er her er der ikke requestet en statisk fil, hverken i public- eller admin-mappen
     var action = routes[pathname];
     if(action){
         // Hvis regex'en ikke fandt noget er vi her.
