@@ -24,16 +24,16 @@ exports.menuselect = function(res, sql, callback){
 
 // articleselect. Henter artikler med kategori id.
 // Da der indgår client data i queryen, er der anvendt prepared statements.
-exports.articleselect = function(res, sql, values, callback){
-    connection.query(sql, values, function(err, data){
-        if(err){
-            helpers.respond(res, {besked : 'Database ikke tilgængelig'}, 503);
-            return;
-        }
-        callback(data);
-    });
-}
-
+// exports.articleselect = function(res, sql, values, callback){
+//     connection.query(sql, values, function(err, data){
+//         if(err){
+//             helpers.respond(res, {besked : 'Database ikke tilgængelig'}, 503);
+//             return;
+//         }
+//         callback(data);
+//     });
+// }
+ 
 // verifyUserCreds verificerer at brugernavn og kodeord findes i DB.
 // Da der indgår client data i queryen, er der anvendt prepared statements.
 // Sender de fundne data til callback funktionen hvis brugernavn og kodeord matcher.
