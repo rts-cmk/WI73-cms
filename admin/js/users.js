@@ -1,10 +1,6 @@
 function users() {
-    fetch('/users', { method: 'get', credentials:'include'})
+    fetch('/users', { method: 'get' })
     .then(function (data) {
-        if(data.redirected){
-            // Hvis response objectets 'redirected' er true...
-            location = data.url; // ...så send browseren til redirected url'en...
-        }
         return data.json();
     })
     .then(function (jsonData) {
@@ -64,7 +60,7 @@ function userAdd(caller){
     var form = document.querySelector('#frmUserAdd');
     var formData = new FormData(form);
     if(formData.get("username").trim().length < 1){
-        alert("Brugernavn skal angives");
+        alert("Brugernavn angives");
         document.getElementsByName('username')[document.getElementsByName('username').length - 1].focus()            
         return;
     }
@@ -78,11 +74,7 @@ function userAdd(caller){
         method: 'post',
         body: formData
     })
-        .then(function(serverResponse){
-            if(serverResponse.redirected){
-                // Hvis response objectets 'redirected' er true...
-                location = serverResponse.url; // ...så send browseren til redirected url'en...
-            }            
+        .then(function(){
             document.querySelector('div[data-cmd="users"]').click();
         })
         .catch(function(err){
@@ -99,11 +91,7 @@ function userDelete(caller){
         method: 'delete',
         body: frmData
     })
-    .then(function (serverResponse) {
-        if(serverResponse.redirected){
-            // Hvis response objectets 'redirected' er true...
-            location = serverResponse.url; // ...så send browseren til redirected url'en...
-        }            
+    .then(function (data) {
         document.querySelector('div[data-cmd="users"]').click();
     });
 }
@@ -117,11 +105,8 @@ function userEdit(caller) {
         method: 'put',
         body: frmData
     })
-        .then(function (serverResponse) {
-            if(serverResponse.redirected){
-                // Hvis response objectets 'redirected' er true...
-                location = serverResponse.url; // ...så send browseren til redirected url'en...
-            }                        
+        .then(function (data) {
             document.querySelector('div[data-cmd="users"]').click();
+            // return data.json();
         })
 }
