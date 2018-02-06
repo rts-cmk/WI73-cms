@@ -585,7 +585,7 @@ Jeg har valgt at strukturere mapper og filer som vist nedenfor. I figuren er der
 #### Statiske filer
 Vores API kan (endnu) ikke levere statiske filer. Det får vi brug for, så vi skal til at lave de nødvendige tilføjelser til koden. Med statiske filer mener jeg filer der kun sjældent ændres.
 
-De statiske filer der kommer på tale her af type `.html`, `.css`, `.js` og diverse billedfiler som `.png`, `.jpg`, `.gif`, etc. Vi får derfor brug for at kunne bestemme hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.
+De statiske filer der kommer på tale her er af typerne `.html`, `.css`, `.js` og diverse billedfiler som `.png`, `.jpg`, `.gif`, etc. Vi får derfor brug for at kunne bestemme hvilken mimetype vi har med at gøre. Vi skal derfor oprette et objekt til at indholde definitionerne på de mimetyper vi ønsker at kunne håndtere.
 
 Vi opretter et objekt i `helpers.js` filen. Objektet indeholder en række navn/værdi par, hvor navnene svarer til ekstensionen på de filertyper vi ønsker at kunne håndtere, og værdierne svarer til mimetyperne.
 
