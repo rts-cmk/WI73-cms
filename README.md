@@ -193,7 +193,7 @@ HTTP protokollen beskriver en række metoder eller verber og hvordan de er tænk
 
 * GET når vi blot vil hente data fra serveren.
 * POST når vi vil oprette en ressource, fx uploade en ny artikel
-* POST når vi vil opdatere en ressource, fx redigere en artikel, helt eller delvis.
+* PUT når vi vil opdatere en ressource, fx redigere en artikel, helt eller delvis.
 * DELETE når vi vil fjerne en ressource, fx slette en artikel.
 
 Hvis du vil vide mere om HTTP protokollen og HTTP metoder kan du læse mere om det på [IETF's hjemmeside](http://www.ietf.org/rfc/rfc2616.txt)
