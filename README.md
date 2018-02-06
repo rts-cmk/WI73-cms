@@ -291,7 +291,7 @@ Jeg har valgt JSON, fordi det er nemt at overskue for os mennesker. Derfor er de
 
 Indledningsvis vil jeg demonstrere et meget simpelt API, blot for at vise hvordan det kan gøres.
 
-I første omgang vil jeg udelukkende benytte mig af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at `nodemon` modulet installeres. Dette modul gør livet lidt nemmere når man udvikler. Ved starte din node server med `nodemon`, slipper du nemlig for at skulle genstarte hvergang du laver ændringer i din kode.
+I første omgang vil jeg udelukkende benytte mig af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at `nodemon` modulet installeres. Dette modul gør livet lidt nemmere når man udvikler. Ved at bruge `nodemon` til at starte din node server, slipper du nemlig for at skulle genstarte hvergang du laver ændringer i din kode.
 
 Jeg starter med at vælge hvilken HTTP port vores server skal anvende. Jeg har valgt at bruge port 3003. I princippet kan man bruge hvilken som helst port, blot skal man sikre sig at porten ikke allerede er i brug. Typisk vil man vælge et portnummer højere end 1024, fordi anvendelsen af porte med lavere nummer kræver administratorrettigheder. Det betyder, at hvis man vælger portnummer under 1024 skal man starte sin server op som administrator. Det frarådes af sikkerhedsgrunde.  
 
