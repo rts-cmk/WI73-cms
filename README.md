@@ -323,7 +323,7 @@ I server modulet importerer vi først to moduler, `http` og `router`.  Dernæst 
 
 Koden i modulet `router` der sendes "ned i maven" på serveren vil blive eksekveret hver gang serveren modtager en indkommende *request* på port 3003.
 
-For at starte serveren skal vi indtaste kommandoen `npm server.js` i en terminal. Hvis vi forsøger at starte serveren op med denne kommando inden vi har skrevet koden til modulet `router.js` vil det naturlgvis ikke lykkes. Serveren kan nemlig ikke finde `router.js` modulet da det ikke findes endnu.
+For at starte serveren skal vi indtaste kommandoen `node server.js` i en terminal. Hvis vi forsøger at starte serveren op med denne kommando inden vi har skrevet koden til modulet `router.js` vil det naturlgvis ikke lykkes. Serveren kan nemlig ikke finde `router.js` modulet da det ikke findes endnu.
 
 Men lad oprette modulet og få skrevet den kode der skal være i modulet. Koden skal udgøre de to endpointhandlere for `/cat` og `/dog`. Opret en fil, `router.js` og indsæt koden nedenfor.
 
