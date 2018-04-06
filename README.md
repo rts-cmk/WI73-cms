@@ -59,11 +59,11 @@ Netop fordi dette system er udviklet til undervisning, har jeg bevidst søgt en 
   
 Som sagt får vi brug for et databasesystem. Der findes mange databasesystemer at vælge i mellem. Jeg har valgt at bruge MySQL. Ligeledes findes der en række databaseværktøjer til at administrere databaser og tabeller i MySQL, fx. phpMyAdmin, MySQL-Workbench, Valentina-studio, Sequel-pro eller den tekstbaserede MySQL client der er en del af MySQL installationen. Jeg vil ikke komme ind på brugen af disse værktøjer, men blot kort beskrive de tabeller vi får brug for og præsentere de sql statements der kan oprette databasen og tabellerne.
 
-Selve databasen kan oprettes med følgende script.
+Selve databasen kan oprettes med følgende `sql` sætning.
 ```sql
-CREATE DATABASE `demo-cms` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_danish_ci */;
+CREATE DATABASE `demo-cms`;
 ```
-Vi skal oprette en tabel til de brugere som skal kunne logge ind på backenden. Tabellen skal indeholde deres credentials (brugernavn/adgangskode). Tabellen skal som minimum have kolonner for id, brugernavn og adgangskode. Jeg har valgt også at have kolonner for billede og sidste opdatering. Vi må kræve at der ikke er sammenfald mellem brugernavne. Derfor skal vi erklære kolonnen `username` som `unique`. Det gør at vi ikke kan indsætte det samme brugernavn mere end en enkelt gang. Kolonnen for sidste opdatering, `updated`,  er sat til at indsætte `current_timestamp` som standardværdi både ved indsættelse af en række og ved opdatering af en række. Det betyder at vi ikke behøver at indsætte noget i denne kolonne. Databasen vil selv sørge for det.
+Vi skal oprette en tabel til de brugere som skal kunne logge ind på backenden. Tabellen skal indeholde deres credentials (brugernavn/adgangskode). Tabellen skal som minimum have kolonner for id, brugernavn og adgangskode. Jeg har valgt også at have kolonner for billede og sidste opdatering. Vi må kræve at der ikke er sammenfald mellem brugernavne. Derfor skal vi erklære kolonnen `username` som `unique`. Det gør at vi ikke kan indsætte det samme brugernavn mere end en enkelt gang. Vi kan jo heller ikke have to eller flere brugere med samme brugernavn. Ellers kan vi ikke skelne mellem dem. Kolonnen for sidste opdatering, `updated`,  er sat til at indsætte `current_timestamp` som standardværdi både ved indsættelse af en række og ved opdatering af en række. Det betyder at vi ikke behøver at indsætte noget i denne kolonne. Databasen vil selv sørge for det.
 
 ```sql
 CREATE TABLE `users` (
@@ -139,7 +139,7 @@ CREATE TABLE `user_sessions` (
 ```
 Jeg vil vente med at omtale denne tabel til vi skal bruge den.
 
-For at backenden kan oprette forbindelse til databasen får vi brug for at oprette en databasebruger. Jeg ved at mange blot vælger at bruge MySQL's indbyggede administratorbruger `root`. Det kan imidlertid ikke anbefales. fordi `root` har alle samtlige rettigheder til alle databaser og tabeller og kan virkelig lave rod i systemet i forbindelse med test af `sql` sætninger.  Derfor vil jeg absolut anbefale at oprette en databasebruger der kun har adgang til den database vi arbejder med, og kun har de nødvendige *crud  rettigheder*. Ikke andet. 
+For at backenden kan oprette forbindelse til databasen får vi brug for at oprette en databasebruger. Jeg ved at mange blot vælger at bruge MySQL's indbyggede administratorbruger `root`. Det kan imidlertid ikke anbefales fordi `root` har samtlige rettigheder til alle databaser og tabeller og kan ved et uheld virkelig lave rod i systemet. Især i forbindelse med test af `sql` sætninger.  Derfor vil jeg absolut anbefale at oprette en databasebruger der kun har adgang til den database vi arbejder med, og kun har de nødvendige *crud  rettigheder*. Ikke andet. 
 
 Ny bruger:
 ```sql
@@ -161,7 +161,7 @@ Den grundlæggende databasestruktur er nu på plads.
 ### API   
 Første gang jeg hørte udtrykket API havde jeg ikke den fjerneste anelse om hvad det betød. Det var inden jeg for alvor var begyndt at beskæftige mig med softwareudviking. API kunne for min skyld lige så godt være et tilsætningsstof til vaskepulver, en ny plasttype eller måske en ny type øl. I dag er jeg så vant til at bruge begrebet, at jeg for sjov godt kunne finde på at gå ind i den nærmeste Matas butik og bede om 250 gram API. Mest for undersøge om Matas skulle ligge inde med noget API. Der er dog en risiko for at Matas ekspedienten ville svare:  `404: Ressource ikke tilgængelig`.  
 
-Spøg til side. API står, som bekendt, for *Application Programming Interface*. Når det handler om udvikling af websider, arbejder vi med et web API. Fx når vi indtaster `http://www.facebook.com` i browserens adressefelt sender browseren en forespørgsel til facebooks webserver. Denne forespørgsel kalder vi oftest en *request*. Requesten skal have et bestemt format for at serveren kan forstå den. Hvis facebooks server forstår requesten vil serveren sende et svar tilbage. Svaret kalder vi *response*. Hvis responsen har et format som browseren forstår, vil den fortolke responsen der så kan blive vist på den planlagte måde. Hvis vores request til serveren ikke har det rigtige format, eller vi requester en ressource der ikke findes, vil serveren svare, ligesom ekspedienten i Matas, med en statuskode der fortæller hvad der gik galt, fx. `404: Ressource ikke tilgængelig`. Det vi har med at gøre her er et web API. Dette API kan vi designe så det er skræddersyet til vores formål.
+Spøg til side. API står, som bekendt, for *Application Programming Interface*. Når vi indtaster `http://www.facebook.com` i browserens adressefelt sender browseren en forespørgsel til facebooks webserver. Denne forespørgsel kalder vi oftest en *request*. Requesten skal have et bestemt format for at serveren kan forstå den. Hvis facebooks server forstår requesten vil serveren sende et svar tilbage. Svaret kalder vi *response*. Hvis responsen har et format som browseren forstår, vil den fortolke responsen der så kan blive vist på den planlagte måde. Hvis vores request til serveren ikke har det rigtige format, eller vi requester en ressource der ikke findes, vil serveren svare, ligesom ekspedienten i Matas, med en statuskode der fortæller hvad der gik galt, fx. `404: Ressource ikke tilgængelig`. Det vi har med at gøre her er et web API. Dette API kan vi designe så det er skræddersyet til vores formål.
 
 Når vi designer et web API handler det primært om at definere såkaldte *endpoints* og det dataformat vi skal benytte, fx JSON eller XML eller et andet format.
 
@@ -169,9 +169,9 @@ Når vi designer et web API handler det primært om at definere såkaldte *endpo
 #### Endpoints  
 Lad os kigge på en ganske almindelig URL: `http://www.skat.dk/skat.aspx?oid=2661`. Denne URL kan splittes op i forskellige dele:  
 * Protokollen:  `http:`.
-* Domænenavn: `www.skat.dk` domænenavn. Protokol og domænenavn adskilles med `//`
+* Domænenavn: `www.skat.dk`. Protokol og domænenavn adskilles med `//`
 * Endpoint: `/skat.aspx` der her består af en skråstreg og et filnavn.
-* Og tilsidst querystrengen: `oid=2661` spørgsmålstegn er skilletegn mellem endpoint og parametre.
+* Og tilsidst querystrengen: `oid=2661` spørgsmålstegn er skilletegn mellem endpoint og querystrengen. Querystrengen kan bestå af en eller flere parametre.
 
 I princippet kan der være et vilkårligt antal parametre. De skal blot adskilles med `&` som vist i det næste
 eksempel: `http://eksempel.dk/sport/tennis?place=wi&year=2017&dbl=1`. Her udgør `/sport/tennis` vores endpoint. Efter spørgsmålstegnet kommer querystrengen, der her består af tre parametre: 
@@ -193,7 +193,7 @@ HTTP protokollen beskriver en række metoder eller verber og hvordan de er tænk
 
 * GET når vi blot vil hente data fra serveren.
 * POST når vi vil oprette en ressource, fx uploade en ny artikel
-* PUT når vi vil opdatere en ressource, fx redigere en artikel, helt eller delvis.
+* PUT når vi vil opdatere en ressource, fx redigere en artikel.
 * DELETE når vi vil fjerne en ressource, fx slette en artikel.
 
 Hvis du vil vide mere om HTTP protokollen og HTTP metoder kan du læse mere om det på [IETF's hjemmeside](http://www.ietf.org/rfc/rfc2616.txt)
@@ -291,7 +291,7 @@ Jeg har valgt JSON, fordi det er nemt at overskue for os mennesker. Derfor er de
 
 Indledningsvis vil jeg demonstrere et meget simpelt API, blot for at vise hvordan det kan gøres.
 
-I første omgang vil jeg udelukkende benytte mig af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at `nodemon` modulet installeres. Dette modul gør livet lidt nemmere når man udvikler. Ved at bruge `nodemon` til at starte din node server, slipper du nemlig for at skulle genstarte hvergang du laver ændringer i din kode.
+I første omgang vil jeg udelukkende benytte mig af moduler der er en del af node.js installationen. Derfor er der ikke behov for at installere 3. parts moduler. Jeg vil dog anbefale at `nodemon` modulet installeres. Dette modul gør livet lidt nemmere når man udvikler. Ved at bruge `nodemon` til at starte din node server, slipper du nemlig for at skulle genstarte hver gang du laver ændringer i din kode.
 
 Jeg starter med at vælge hvilken HTTP port vores server skal anvende. Jeg har valgt at bruge port 3003. I princippet kan man bruge hvilken som helst port, blot skal man sikre sig at porten ikke allerede er i brug. Typisk vil man vælge et portnummer højere end 1024, fordi anvendelsen af porte med lavere nummer kræver administratorrettigheder. Det betyder, at hvis man vælger portnummer under 1024 skal man starte sin server op som administrator. Det frarådes af sikkerhedsgrunde.  
 
