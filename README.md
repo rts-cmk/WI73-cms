@@ -221,8 +221,9 @@ http://localhost/article  |'/article'  |GET   |send artikler
 http://localhost/article  |'/article'  |POST  |opret artikel
 http://localhost/article  |'/article'  |PUT   |opdater artikel
 http://localhost/article  |'/article'  |DELETE|fjern artikel
+http://localhost/login    |'/login'    |GET   |send login.html
 http://localhost/login    |'/login'    |POST  |opret login session
-http://localhost/logout   |'/logout'   |DELETE|fjern login session
+http://localhost/login    |'/login'    |DELETE|fjern login session
 
 
 <a id="3.4-request_response"></a> [top &uarr;](#top)
